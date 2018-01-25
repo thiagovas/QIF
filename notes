@@ -1,6 +1,15 @@
 two parts parser
   lexer -> parser
 
-  crinado tokens eh possivel categorizar de antemao todos os elementos da eq e em seguida alimentar o parser de forma mais simples
+  criando tokens eh possivel categorizar de antemao todos os elementos da eq e em seguida alimentar o parser de forma mais simples
 
 good source: https://tomassetti.me/parsing-in-python/
+
+############################################################
+ROADMAP:
+  simple lexer = done?
+  parser       = now
+  old metrics
+  new metrics
+  composition operators
+  make a better lexer :)
