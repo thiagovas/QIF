@@ -1,5 +1,5 @@
 two parts parser
-  tokens -> parser
+  lexer -> parser
 
   crinado tokens eh possivel categorizar de antemao todos os elementos da eq e em seguida alimentar o parser de forma mais simples
 
