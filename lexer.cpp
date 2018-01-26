@@ -1,6 +1,6 @@
 #include <lexer.h>
 using namespace std;
-list<struct tok> tokenize( char * in ) 
+queue<struct tok> tokenize( char * in ) 
 {
   char * s = in;
   string str;
@@ -12,7 +12,7 @@ list<struct tok> tokenize( char * in )
     s++;
   }
   cout << str << endl;
-  list<struct tok> list;
+  queue<struct tok> q;
   for( int i=0; i<str.length(); i++ ) {
     struct tok t;
     if( str[i] == '(' ) {
@@ -35,10 +35,10 @@ list<struct tok> tokenize( char * in )
       cout << "Lexer ERROR" << endl;
       exit(0);
     }
-    list.push_back(t);
+    q.push(t);
   }
-  cout << list.size() << endl;
-  return list;
+  cout << q.size() << endl;
+  return q;
 }
 // cada tok de operador aponta para 2 tok de variavel
 // return list de tokiens

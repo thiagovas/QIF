@@ -1,7 +1,10 @@
+// lexer.h
+#ifndef lexer_h
+#define lexer_h
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include <list>
+#include <queue>
 
 struct tok
 {
@@ -10,6 +13,7 @@ struct tok
   //1 = VAR
   //2 = OPEN
   //3 = CLOSE
+  //4 = NODE
   int op_type;
   //0
   //1
@@ -17,4 +21,6 @@ struct tok
   int v_label;
 };
 
-list<struct tok> tokenize( char * in );
+queue<struct tok> tokenize( char * in );
+
+#endif
