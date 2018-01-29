@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include <queue>
+#include <list>
 
 struct tok
 {
@@ -21,6 +21,6 @@ struct tok
   int v_label;
 };
 
-queue<struct tok> tokenize( char * in );
+std::list<struct tok> tokenize( char * in );
 
 #endif

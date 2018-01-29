@@ -1,6 +1,7 @@
-#include <lexer.h>
+#include "lexer.h"
+#include "define.h"
 using namespace std;
-queue<struct tok> tokenize( char * in ) 
+list<struct tok> tokenize( char * in ) 
 {
   char * s = in;
   string str;
@@ -12,22 +13,22 @@ queue<struct tok> tokenize( char * in )
     s++;
   }
   cout << str << endl;
-  queue<struct tok> q;
+  list<struct tok> q;
   for( int i=0; i<str.length(); i++ ) {
     struct tok t;
     if( str[i] == '(' ) {
-      t.type == 2; 
+      t.type = T_OPEN; 
     }
     else if( str[i] == ')' ) {
-      t.type == 3;
+      t.type = T_CLOSE;
     }
     else if( str[i] == 'O' && str[i+1] == 'P' ) {
-      t.type = 0; 
+      t.type = T_OP; 
       t.v_label = ((int)str[i+2]) - 48;
       i+=2;
     }
     else if( str[i] == 'v' ) {
-      t.type = 1;
+      t.type = T_VAR;
       t.v_label = ((int)str[i+1]) - 48;
       i++;
     }
@@ -35,7 +36,7 @@ queue<struct tok> tokenize( char * in )
       cout << "Lexer ERROR" << endl;
       exit(0);
     }
-    q.push(t);
+    q.push_back(t);
   }
   cout << q.size() << endl;
   return q;
