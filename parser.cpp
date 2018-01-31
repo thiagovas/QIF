@@ -1,59 +1,65 @@
-#include "lexer.h"
 #include "parser.h"
-#include "define.h"
 using namespace std;
-
-int abt::getType()
-{
-  return 0;
+#define N_VAR 0
+#define N_OP  1
+struct node * setup_var( int l ) {
+  struct node * n = new node;
+  n->type = N_VAR;
+  n->var_label = l;
+  return n;
 }
-int op_node::getType() 
-{
-  return type;
+struct node * setup_op( int op_t ) {
+  struct node * n = new node;
+  n->type = N_OP;
+  n->op_type = op_t;
+  return n;
 }
-void op_node::setupVar(int t)
+struct node * rec_build( list<struct tok> l ) 
 {
-  type = t;
-}
-int var_node::getType()
-{
-  return 1;
-}
-abt fun::parser( list<struct tok> q ) 
-{
-   
-}
-void parser::parser( list<struct tok> q )
-{
-  int p = 0;
-  op_node r;
-  b_count = 0;
-  if( q.front().type == T_VAR ) {
-    struct tok left_var = q.front(); q.pop_front();
-    struct tok op       = q.front(); q.pop_front();
-    r.left = new var_node;
-
-    r.setupOP( op.op_type );
-    r.left.setupVar(left_var.v_label,NULL);
-
-    struct tok next = q.front();
-    // Aponta pra outra OP
-    if( next.type == T_OPEN ) {
-      r.right = fun( q );
+  struct node * n;
+  if( l.front().type == T_VAR ) {
+    struct tok t_left = l.front(); l.pop_front();
+    struct tok t_op   = l.front(); l.pop_front();
+    struct tok t_next = l.front(); l.pop_front();
+    n = setup_op( t_op.type );
+    n->left = setup_var( t_left.v_label );
+    if( t_next.type == T_VAR ) {
+      n->right = setup_var( t_next.v_label );
     }
-    // Exp completa
-    else if( next.type == T_VAR ) {
-      r.right = new var_node;
+    else if ( t_next.type == T_OPEN ) {
+      n->right = rec_build( l );
     }
   }
-  else if( q.front().type == T_OPEN ) {
-    // TODO
+  else if( l.front().type == T_OPEN ) {
+    
   }
-};
-
-// Toda expressao comeca com um T_OPEN ou T_VAR
-// Vai ser raiz se comecar por T_VAR
-// Se comeca com T_OPEN a primeira op nao é a raiz
-
-// parser::parser define sempre a raiz
-// implementar funcoes que permitem essa abordagem
+  else {
+    cout << "UNDEFINED BEHAVIOUR: rec_build" << endl;
+  }
+  return n;
+}
+struct parse_tree * build_parse_tree( list<struct tok> l )
+{
+  struct parse_tree * p = new struct parse_tree; 
+  if( l.front().type == T_VAR ) {
+    struct tok t_left = l.front(); l.pop_front();
+    struct tok t_op   = l.front(); l.pop_front();
+    struct tok t_next = l.front(); l.pop_front();
+    p->root = setup_op( t_op.type );
+    p->root->left = setup_var( t_left.v_label );
+    if( t_next.type == T_VAR ) {
+      p->root->right = setup_var( t_next.v_label);
+    }
+    else if( t_next.type == T_OPEN ) {
+      // TODO
+      p->root->right = rec_build( l );
+    }
+  }
+  else if( l.front().type == T_OPEN ) {
+    // Comeca com uma exp
+  }
+  else {
+    cout << "UNDEFINED BEHAVIOUR: build_parse_tree" << endl;
+  }
+  return p;
+}
