@@ -8,7 +8,15 @@ void print_parse_tree( struct parse_tree * p )
   queue<struct node *> q;
   q.push(p->root);
   while( !q.empty() ) {
-
+    if( q.front()->type == N_OP ) {
+      q.push(q.front()->left);
+      q.push(q.front()->right);
+      cout << "OP" << q.front()->op_type << " ";
+    }
+    else if( q.front()->type == N_VAR ) {
+      cout << "v" << q.front()->var_label << " ";
+    }
+    q.pop();
   }
 }
 int main()

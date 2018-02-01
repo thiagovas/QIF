@@ -20,7 +20,7 @@ struct node * rec_build( list<struct tok> * l )
     struct tok t_left = l->front(); l->pop_front();
     struct tok t_op   = l->front(); l->pop_front();
     struct tok t_next = l->front(); l->pop_front();
-    n = setup_op( t_op.type );
+    n = setup_op( t_op.op_type );
     n->left = setup_var( t_left.v_label );
     if( t_next.type == T_VAR ) {
       n->right = setup_var( t_next.v_label );
@@ -34,7 +34,7 @@ struct node * rec_build( list<struct tok> * l )
     struct node * r = rec_build( l );
     struct tok t_op = l->front(); l->pop_front();
     struct tok t_next = l->front(); l->pop_front();
-    n = setup_op( t_op.type );
+    n = setup_op( t_op.op_type );
     n->left = r;
     if( t_next.type == T_VAR ) {
       n->right = setup_var( t_next.v_label );
@@ -55,7 +55,7 @@ struct parse_tree * build_parse_tree( list<struct tok> * l )
     struct tok t_left = l->front(); l->pop_front();
     struct tok t_op   = l->front(); l->pop_front();
     struct tok t_next = l->front(); l->pop_front();
-    p->root = setup_op( t_op.type );
+    p->root = setup_op( t_op.op_type );
     p->root->left = setup_var( t_left.v_label );
     if( t_next.type == T_VAR ) {
       p->root->right = setup_var( t_next.v_label);
