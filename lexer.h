@@ -21,6 +21,6 @@ struct tok
   int v_label;
 };
 
-std::list<struct tok> tokenize( char * in );
+std::list<struct tok> * tokenize( char * in );
 
 #endif

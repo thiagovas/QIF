@@ -17,5 +17,6 @@ struct node {
 struct parse_tree {
   node * root;
 };
-struct parse_tree * build_parse_tree( std::list<struct tok> l );
+struct node * rec_build( std::list<struct tok> * l );
+struct parse_tree * build_parse_tree( std::list<struct tok> * l );
 #endif

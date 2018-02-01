@@ -1,11 +1,10 @@
 #include "lexer.h"
 #include "define.h"
 using namespace std;
-list<struct tok> tokenize( char * in ) 
+list<struct tok> * tokenize( char * in ) 
 {
   char * s = in;
   string str;
-
   // rm whitespace
   while( *s != '\0' ) {
     if( *s != ' ' )
@@ -13,7 +12,7 @@ list<struct tok> tokenize( char * in )
     s++;
   }
   cout << str << endl;
-  list<struct tok> q;
+  list<struct tok> * l = new list<struct tok>;
   for( int i=0; i<str.length(); i++ ) {
     struct tok t;
     if( str[i] == '(' ) {
@@ -24,7 +23,7 @@ list<struct tok> tokenize( char * in )
     }
     else if( str[i] == 'O' && str[i+1] == 'P' ) {
       t.type = T_OP; 
-      t.v_label = ((int)str[i+2]) - 48;
+      t.op_type = ((int)str[i+2]) - 48;
       i+=2;
     }
     else if( str[i] == 'v' ) {
@@ -36,10 +35,9 @@ list<struct tok> tokenize( char * in )
       cout << "Lexer ERROR" << endl;
       exit(0);
     }
-    q.push_back(t);
+    l->push_back(t);
   }
-  cout << q.size() << endl;
-  return q;
+  return l;
 }
 // cada tok de operador aponta para 2 tok de variavel
 // return list de tokiens
