@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "define.h"
 using namespace std;
+
 struct node * setup_var( int l ) {
   struct node * n = new node;
   n->type = N_VAR;

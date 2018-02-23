@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "parser.h"
 using namespace std;
+
 void print_parse_tree( struct parse_tree * p )
 {
   queue<struct node *> q;
@@ -19,6 +20,7 @@ void print_parse_tree( struct parse_tree * p )
     q.pop();
   }
 }
+
 int main()
 {
   char input[100];

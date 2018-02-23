@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include "define.h"
 using namespace std;
+
 list<struct tok> * tokenize( char * in ) 
 {
   char * s = in;
