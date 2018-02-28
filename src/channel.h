@@ -6,7 +6,7 @@
 
 class Channel {
   public:
-    Channel(int n_in, n_out) : n_in(n_in_), n_out(n_out_);
+    Channel(int n_in, int n_out);
     
     // This function parses a channel string.
     void ParseInput(std::string input_str);
@@ -23,11 +23,19 @@ class Channel {
     // This function randomizes the current channel.
     // Maintaining the channel dimensions.
     void Randomize();
+    
+    friend std::ostream& operator<< (std::ostream& stream, const Channel& c);
 
   private:
 
     // This is the channel matrix. ( p(y|x) )
     std::vector<std::vector<double> > c_matrix;
+
+    // This is the posterior probability matrix. ( hyper distribution p(x|y) )
+    std::vector<std::vector<double> > h_matrix;
+
+    // This is the prior distribution.
+    std::vector<double> prior_distribution;
 
     // These ints keep the number of input lines we have,
     // and the number of output lines.
