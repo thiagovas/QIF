@@ -13,3 +13,27 @@ ROADMAP:
   new metrics
   composition operators
   make a better lexer :)
+
+Roadmap
+
+- Implementação
+  - Parser 		OK
+  - Estrutura 		OK
+  - Utilidades 		WIP
+	02/04 -> 08/04
+  - Metodos Antigos	0%
+	09/04 -> 15/04
+  - Metodos Novos	0%
+	16/04 -> 22/04
+  - Operadores		0%
+	23/04 -> 29/04
+- Comparacao dos metodos
+  - Modelagem e analise usando metodo tradicional
+	30/04 -> 06/05
+  - Modelagem e analise usando metodo aproximativo
+	07/05
+- Restantes
+  - Escrever o relatorio
+  - Poster
+  - Apresentacao parcial e final
+  - Bugfixes e melhorias
