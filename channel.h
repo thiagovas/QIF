@@ -14,6 +14,22 @@ class Channel {
   public:
     Channel(int n_in, int n_out);
 
+    int n_in() const {
+      return this->n_in_;
+    }
+
+    int n_out() const {
+      return this->n_out_;
+    }
+    
+    std::vector<std::string> in_names() const {
+      return this->in_names_;
+    }
+    
+    std::vector<std::string> out_names() const {
+      return this->out_names_;
+    }
+
     // This function parses a channel string.
     void ParseInput(std::string input_str);
 
@@ -22,12 +38,44 @@ class Channel {
 
     // This function returns a string that represents the
     // current channel.
-    std::string to_string();
+    std::string to_string() const;
     
     // TODO(thiagovas): Describe what this function does.
-    bool CompatibleChannels(Channel c1, Channel c2);
+    bool CompatibleChannels(const Channel& c1, const Channel& c2) const;
 
     friend std::ostream& operator<< (std::ostream& stream, const Channel& c);
+
+    // This function randomizes the current channel.
+    // Maintaining the channel dimensions.
+    void Randomize();
+
+    // This function transposes the current channel.
+    // The input becomes the output, and the output becomes the
+    // input; matrix-wise we'll have p(x|y) instead of p(y|x).
+    void Transpose();
+    
+
+    // TODO(thiagovas): Improvement. Create a namespace 'metrics',
+    //                    or something like that.
+    // OLD METRICS
+    // In bits
+    double ShannonEntropyPrior() const;
+    double ShannonEntropyOut() const;
+    double ConditionalEntropy() const;
+    double ConditionalEntropyHyper() const;
+    double JointEntropy() const;
+    double GuessingEntropy() const;
+    double MutualInformation() const;
+    double NormalizedMutualInformation() const;
+    double SymmetricUncertainty() const;
+    
+    double BayesVulnerabilityPrior() const;
+    double BayesVulnerability() const;
+    double BayesVulnerabilityHyper() const;
+    
+    double BayesLeakagePrior() const;
+    double BayesLeakage() const;
+    double BayesLeakageHyper() const;
 
 
   private:
@@ -46,6 +94,12 @@ class Channel {
     // This is the joint matrix. ( p(x,y) )
     std::vector<std::vector<double> > j_matrix;
 
+    // The maximum p(x, y) per x; used by the bayes' metrics.
+    std::vector<double> max_pinput;
+
+    // The maximum p(x, y) per y; used by the bayes' metrics.
+    std::vector<double> max_poutput;
+
     // These ints keep the number of input lines we have,
     // and the number of output lines.
     int n_in_, n_out_;
@@ -56,23 +110,6 @@ class Channel {
     // These vectors keep the names of each input line and
     // each output line
     std::vector<std::string> in_names_, out_names_;
-
-    // This function randomizes the current channel.
-    // Maintaining the channel dimensions.
-    void Randomize();
-
-    // This function transposes the current channel.
-    // The input becomes the output, and the output becomes the
-    // input; matrix-wise we'll have p(x|y) instead of p(y|x).
-    void Transpose();
-
-    // OLD METRICS
-    // In bits
-    double ShannonEntropy();
-    double ConditionalEntropy();
-    double JointEntropy();
-    double GuessingEntropy();
-    double MutualInformation();
 };
 
 #endif

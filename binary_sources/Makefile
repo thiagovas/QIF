@@ -10,17 +10,30 @@ prep:
 	mkdir -p $(BIN)
 
 
-build: main.o  parser.o lexer.o
-	$(CC) $(BIN)/*.o -o main $(CC_FLAGS)
+# Main Rules
+main: parser.o lexer.o main.o
+	$(CC) $(BIN)/parser.o $(BIN)/lexer.o $(BIN)/main.o -o main $(CC_FLAGS)
+
+channel_tst: channel.o channel_tst.o
+	$(CC) $(BIN)/channel.o $(BIN)/channel_tst.o -o channel_tst $(CC_FLAGS)
+	
 
 
-main.o: parser.o lexer.o
+# Unique compiles from this folder.
+channel_tst.o:
+	$(CC) -c channel_tst.cpp -o $(BIN)/channel_tst.o $(CC_FLAGS)
+
+main.o:
 	$(CC) -c main.cpp -o $(BIN)/main.o $(CC_FLAGS)
 
 
+
+# Unique compiles from other folders.
+channel.o:
+	$(CC) -c $(SRC)/channel.cpp -o $(BIN)/channel.o $(CC_FLAGS)
+
 parser.o: lexer.o
 	$(CC) -c $(SRC)/parser.cpp -o $(BIN)/parser.o $(CC_FLAGS)
-
 
 lexer.o:
 	$(CC) -c $(SRC)/lexer.cpp -o $(BIN)/lexer.o $(CC_FLAGS)

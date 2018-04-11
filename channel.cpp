@@ -17,6 +17,10 @@ void Channel::Reset() {
   // The prior is a uniform distribution by default.
   this->prior_distribution.resize(this->n_in_, 1.0f/this->n_in_);
   this->out_distribution.resize(this->n_out_, 0);
+
+  this->max_pinput.resize(this->n_in_, 0);
+
+  this->max_poutput.resize(this->n_out_, 0);
   
   // Important: The first index of the matrices always represents
   // the x variable.
@@ -35,7 +39,7 @@ void Channel::ParseInput(std::string input_str) {
 
 // This function returns a string that represents the
 // current channel.
-std::string Channel::to_string() {
+std::string Channel::to_string() const {
   // TODO(thiagovas): Make sure the string generated is recognizable
   //                  by the ParseInput method.
   //                  The following piece of code must work:
@@ -110,18 +114,27 @@ void Channel::Randomize() {
       this->base_norm_ += neue;
       this->j_matrix[i][j] = neue;
     }
-  }  
+  }
   for( int i=0; i<this->n_in_; i++ ) {
     for( int j=0; j<this->n_out_; j++ ) {
       this->j_matrix[i][j] /= this->base_norm_;
+      this->c_matrix[i][j] = this->j_matrix[i][j] / this->prior_distribution[i];
+      this->out_distribution[j] += this->j_matrix[i][j];
+
+      this->max_pinput[i] = std::max(this->max_pinput[i], this->j_matrix[i][j]);
+      this->max_poutput[j] = std::max(this->max_poutput[j], this->j_matrix[i][j]);
+    }
+  }
+
+  for( int i=0; i<this->n_in_; i++ ) {
+    for( int j=0; j<this->n_out_; j++ ) {
+      this->h_matrix[i][j] = this->j_matrix[i][j] / this->out_distribution[j];
     }
   }
 }
 
-bool Channel::CompatibleChannels(Channel c1, Channel c2) {
-  if(c1.n_in_ == c2.n_in_ && c1.in_names_ == c2.in_names_)
-    return true;
-  return false;
+bool Channel::CompatibleChannels(const Channel& c1, const Channel& c2) const {
+  return (c1.n_in() == c2.n_in() && c1.in_names() == c2.in_names());
 }
 
 std::ostream& operator<< (std::ostream& stream, const Channel& channel) {
@@ -129,19 +142,27 @@ std::ostream& operator<< (std::ostream& stream, const Channel& channel) {
   return stream;
 }
 
-double Channel::ShannonEntropy() {
+double Channel::ShannonEntropyPrior() const {
   double entropy = 0;
-  for(int i=0; i<this->n_out_; i++){
-    entropy += (this->prior_distribution[i]*log2(1/this->prior_distribution[i]));
-  } 
+  for(int i = 0; i < this->n_in_; i++) {
+    entropy += (this->prior_distribution[i]*log2(1.0f/this->prior_distribution[i]));
+  }
   return entropy;
 }
 
-double Channel::ConditionalEntropy() {
+double Channel::ShannonEntropyOut() const {
   double entropy = 0;
-  for(int j=0; j<this->n_out_; j++){
+  for(int i = 0; i < this->n_out_; i++) {
+    entropy += (this->out_distribution[i]*log2(1.0f/this->out_distribution[i]));
+  }
+  return entropy;
+}
+
+double Channel::ConditionalEntropy() const {
+  double entropy = 0;
+  for(int j=0; j<this->n_out_; j++) {
     double conditional_entropy_X = 0;
-    for(int i=0; i<this->n_in_; i++){
+    for(int i=0; i<this->n_in_; i++) {
       conditional_entropy_X += (this->h_matrix[i][j] * log2(1/this->h_matrix[i][j]));
     }
     entropy += (this->out_distribution[j] * conditional_entropy_X);
@@ -149,23 +170,27 @@ double Channel::ConditionalEntropy() {
   return entropy;
 }
 
-double Channel::JointEntropy() {
+double Channel::ConditionalEntropyHyper() const {
+  
+}
+
+double Channel::JointEntropy() const {
   double entropy = 0;
   std::vector<std::vector<double> > v = this->c_matrix;
   for(int i=0; i<this->n_in_; i++) {
     for(int j=0; j<this->n_out_; j++) {
-      v[i][j] = v[i][j] * this->prior_distribution[i]; 
+      v[i][j] = v[i][j] * this->prior_distribution[i];
     }
   }
   for(int i=0; i<this->n_in_; i++) {
     for(int j=0; j<this->n_out_; j++) {
       entropy += (v[i][j]*log2(1/v[i][j]));
     }
-  } 
+  }
   return entropy;
 }
 
-double Channel::GuessingEntropy() {
+double Channel::GuessingEntropy() const {
   double entropy = 0;
   std::vector<double> v = this->prior_distribution;
   std::sort(v.begin(),v.end());
@@ -174,6 +199,31 @@ double Channel::GuessingEntropy() {
   return entropy;
 }
 
-double Channel::MutualInformation() {
-  return (this->ConditionalEntropy() - this->ShannonEntropy());
+double Channel::MutualInformation() const {
+  return (this->ConditionalEntropy() - this->ShannonEntropyPrior());
 }
+
+
+double Channel::NormalizedMutualInformation() const
+{}
+
+double Channel::SymmetricUncertainty() const
+{}
+
+double Channel::BayesVulnerabilityPrior() const
+{}
+
+double Channel::BayesVulnerabilityHyper() const
+{}
+
+double Channel::BayesVulnerability() const
+{}
+
+double Channel::BayesLeakagePrior() const
+{}
+
+double Channel::BayesLeakage() const
+{}
+
+double Channel::BayesLeakageHyper() const
+{}

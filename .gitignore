@@ -9,6 +9,7 @@
 # Compiled Object files
 bin/
 main
+channel_tst
 *.slo
 *.lo
 *.o
