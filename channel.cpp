@@ -158,33 +158,39 @@ double Channel::ShannonEntropyOut() const {
   return entropy;
 }
 
-double Channel::ConditionalEntropy() const {
+// H(X|Y)
+double Channel::ConditionalEntropyHyper() const {
   double entropy = 0;
-  for(int j=0; j<this->n_out_; j++) {
+  for(int j = 0; j < this->n_out_; j++) {
     double conditional_entropy_X = 0;
-    for(int i=0; i<this->n_in_; i++) {
-      conditional_entropy_X += (this->h_matrix[i][j] * log2(1/this->h_matrix[i][j]));
+    for(int i = 0; i < this->n_in_; i++) {
+      conditional_entropy_X += (this->h_matrix[i][j] * log2(1.0f/this->h_matrix[i][j]));
     }
     entropy += (this->out_distribution[j] * conditional_entropy_X);
   }
   return entropy;
 }
 
-double Channel::ConditionalEntropyHyper() const {
+
+// H(Y|X)
+double Channel::ConditionalEntropy() const {
+  double entropy = 0;
+  for(int i = 0; i < this->n_in_; i++) {
+    double conditional_entropy_Y = 0;
+    for(int j = 0; j < this->n_out_; j++) {
+      conditional_entropy_Y += (this->c_matrix[i][j] * log2(1.0f/this->c_matrix[i][j]));
+    }
+    entropy += (this->prior_distribution[i] * conditional_entropy_Y);
+  }
+  return entropy;
   
 }
 
 double Channel::JointEntropy() const {
   double entropy = 0;
-  std::vector<std::vector<double> > v = this->c_matrix;
-  for(int i=0; i<this->n_in_; i++) {
-    for(int j=0; j<this->n_out_; j++) {
-      v[i][j] = v[i][j] * this->prior_distribution[i];
-    }
-  }
-  for(int i=0; i<this->n_in_; i++) {
-    for(int j=0; j<this->n_out_; j++) {
-      entropy += (v[i][j]*log2(1/v[i][j]));
+  for(int i = 0; i < this->n_in_; i++) {
+    for(int j = 0; j < this->n_out_; j++) {
+      entropy += (this->j_matrix[i][j]*log2(1.0f/this->j_matrix[i][j]));
     }
   }
   return entropy;
@@ -194,36 +200,34 @@ double Channel::GuessingEntropy() const {
   double entropy = 0;
   std::vector<double> v = this->prior_distribution;
   std::sort(v.begin(),v.end());
-  for(int i=1; i<=this->n_in_; i++)
-    entropy += (i*v[i]);
+  std::reverse(v.begin(), v.end());
+  for(int i = 1; i <= this->n_in_; i++)
+    entropy += (i*v[i-1]);
   return entropy;
 }
 
+
+// 
 double Channel::MutualInformation() const {
-  return (this->ConditionalEntropy() - this->ShannonEntropyPrior());
+  return (this->ShannonEntropyPrior() - this->ConditionalEntropy());
 }
 
 
-double Channel::NormalizedMutualInformation() const
-{}
+double Channel::NormalizedMutualInformation() const {
+  return this->MutualInformation()/sqrt(this->ShannonEntropyPrior()*this->ShannonEntropyOut());
+}
 
-double Channel::SymmetricUncertainty() const
-{}
+double Channel::SymmetricUncertainty() const {
+  return 2*this->MutualInformation()/(this->ShannonEntropyPrior() + this->ShannonEntropyOut())
+}
 
-double Channel::BayesVulnerabilityPrior() const
-{}
+double Channel::BayesVulnerabilityPrior() const {
+  double vulnerability = 0;
+  for(int i = 0; i < this->n_in_; i++) {
+    vulnerability = std::max(vulnerability, this->prior_distribution[i]);
+  }
+  return vulnerability;
+}
 
-double Channel::BayesVulnerabilityHyper() const
-{}
-
-double Channel::BayesVulnerability() const
-{}
-
-double Channel::BayesLeakagePrior() const
-{}
-
-double Channel::BayesLeakage() const
-{}
-
-double Channel::BayesLeakageHyper() const
-{}
+double Channel::BayesVulnerabilityPosterior() const {
+}

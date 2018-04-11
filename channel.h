@@ -70,11 +70,10 @@ class Channel {
     double SymmetricUncertainty() const;
     
     double BayesVulnerabilityPrior() const;
-    double BayesVulnerability() const;
-    double BayesVulnerabilityHyper() const;
+    double BayesVulnerabilityPosterior() const;
     
     double BayesLeakagePrior() const;
-    double BayesLeakage() const;
+    double BayesLeakagePosterior() const;
     double BayesLeakageHyper() const;
 
 
