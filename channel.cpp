@@ -1,17 +1,30 @@
+#include <algorithm>
+#include <cstdlib>
+#include <iomanip>
+#include <sstream>
+
 #include "channel.h"
-int main() {
-  Channel c(2,3);
-  std::cout << c << std::endl;
-}
 
 Channel::Channel(int n_in, int n_out) : n_in_(n_in), n_out_(n_out) {
-  
+  this->Reset();
+}
+
+
+// This function resets the class to an initial state.
+void Channel::Reset() { 
   // The prior is a uniform distribution by default.
-  this->prior_distribution = std::vector<double>(n_in, 1.0f/n_in);
+  this->prior_distribution.resize(this->n_in_, 1.0f/this->n_in_);
+  this->out_distribution.resize(this->n_out_, 0);
   
-  
+  // Important: The first index of the matrices always represents
+  // the x variable.
+  this->c_matrix.resize(this->n_in_, std::vector<double>(this->n_out_, 0));
+  this->h_matrix.resize(this->n_in_, std::vector<double>(this->n_out_, 0));
+  this->j_matrix.resize(this->n_in_, std::vector<double>(this->n_out_, 0));
+
   Randomize();
 }
+
 
 // This function parses a channel string.
 void Channel::ParseInput(std::string input_str) {
@@ -21,17 +34,46 @@ void Channel::ParseInput(std::string input_str) {
 // This function returns a string that represents the
 // current channel.
 std::string Channel::to_string() {
-  // TODO(thiagovas): Implement this function.
-  //                  The string generated must be recognizable
+  // TODO(thiagovas): Make sure the string generated is recognizable
   //                  by the ParseInput method.
   //                  The following piece of code must work:
   //                  ParseInput(channel.to_string());
+  
+  // Standard output:
+  // First line: Two integers separated by a space: n_in n_out
+  // Follows the j_matrix printed in n_in lines
+  // The n_in+2 line contains the prior distribution.
+  
+  
+  std::stringstream ss;
+  
+  ss << std::fixed << std::setprecision(8);
+
+  ss << this->n_in_ << " " << this->n_out_ << std::endl;
+  for(unsigned i = 0; i < this->j_matrix.size(); i++)
+  {
+    if(not this->j_matrix[i].empty())
+      ss << this->j_matrix[i][0];
+    for(unsigned j = 1; j < this->j_matrix.size(); j++)
+      ss << " " << this->j_matrix[i][j];
+    ss << std::endl;
+  }
+  
+  if(not this->prior_distribution.empty())
+    ss << this->prior_distribution[0];
+  for(unsigned i = 1; i < this->prior_distribution.size(); i++)
+    ss << " " << this->prior_distribution[i];
+  ss << std::endl;
+
+  return ss.str();
 }
+
 
 // This function transposes the current channel.
 // The input becomes the output, and the output becomes the
 // input; matrix-wise we'll have p(x|y) instead of p(y|x).
 void Channel::Transpose() {
+  // TODO(thiagovas): Check the correctness of this method.
   std::vector<double> p_y;
   this->h_matrix = this->c_matrix;
   for( int i=0; i<this->n_in_; i++ ) {
@@ -58,7 +100,7 @@ void Channel::Randomize() {
   std::mt19937 rng;
   rng.seed(std::random_device()());
   std::uniform_int_distribution<std::mt19937::result_type> dist(0,100);
-  // //
+  
   int norm = 0;
   for( int i=0; i<this->n_in_; i++ ) {
     std::vector<double> row;
@@ -67,11 +109,11 @@ void Channel::Randomize() {
       norm += n;
       row.push_back(n);
     }
-    this->c_matrix.push_back(row);
+    this->j_matrix.push_back(row);
   }  
   for( int i=0; i<this->n_in_; i++ ) {
     for( int j=0; j<this->n_out_; j++ ) {
-      this->c_matrix[i][j] /= norm;
+      this->j_matrix[i][j] /= norm;
     }
   }  
 }
@@ -92,6 +134,7 @@ std::ostream& operator<< (std::ostream& stream, const Channel& c) {
   }
   return stream;
 }
+
 double Channel::ShannonEntropy() {
   double entropy = 0;
   for(int i=0; i<this->n_out_; i++){
@@ -99,6 +142,7 @@ double Channel::ShannonEntropy() {
   } 
   return entropy;
 }
+
 double Channel::ConditionalEntropy() {
   double entropy = 0;
   for(int j=0; j<this->n_out_; j++){
@@ -110,6 +154,7 @@ double Channel::ConditionalEntropy() {
   }
   return entropy;
 }
+
 double Channel::JointEntropy() {
   double entropy = 0;
   std::vector<std::vector<double> > v = this->c_matrix;
@@ -125,14 +170,16 @@ double Channel::JointEntropy() {
   } 
   return entropy;
 }
+
 double Channel::GuessingEntropy() {
   double entropy = 0;
   std::vector<double> v = this->prior_distribution;
-  sort(v.begin(),v.end());
+  std::sort(v.begin(),v.end());
   for(int i=1; i<=this->n_in_; i++)
     entropy += (i*v[i]);
   return entropy;
 }
+
 double Channel::MutualInformation() {
   return (this->ConditionalEntropy() - this->ShannonEntropy());
 }

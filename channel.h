@@ -19,6 +19,9 @@ class Channel {
     // This function parses a channel string.
     void ParseInput(std::string input_str);
 
+    // This function resets the class to an initial state.
+    void Reset();
+
     // This function returns a string that represents the
     // current channel.
     std::string to_string();
