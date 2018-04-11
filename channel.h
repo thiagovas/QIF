@@ -3,9 +3,7 @@
 #define channel_h
 #include <string>
 #include <vector>
-#include <random>
 #include <iostream>
-#include <cmath>
 
 // Channel matrix
 // x_0 -> y_0, y_1, ..., y_m
@@ -51,6 +49,9 @@ class Channel {
     // These ints keep the number of input lines we have,
     // and the number of output lines.
     int n_in_, n_out_;
+
+    // This is the norm used to randomly generate the channel.
+    int base_norm_;
 
     // These vectors keep the names of each input line and
     // each output line

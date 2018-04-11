@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <iomanip>
+#include <random>
 #include <sstream>
 
 #include "channel.h"
@@ -101,21 +103,19 @@ void Channel::Randomize() {
   rng.seed(std::random_device()());
   std::uniform_int_distribution<std::mt19937::result_type> dist(0,100);
   
-  int norm = 0;
+  this->base_norm_ = 0;
   for( int i=0; i<this->n_in_; i++ ) {
-    std::vector<double> row;
     for( int j=0; j<this->n_out_; j++ ) {
-      int n = dist(rng);
-      norm += n;
-      row.push_back(n);
+      int neue = dist(rng);
+      this->base_norm_ += neue;
+      this->j_matrix[i][j] = neue;
     }
-    this->j_matrix.push_back(row);
   }  
   for( int i=0; i<this->n_in_; i++ ) {
     for( int j=0; j<this->n_out_; j++ ) {
-      this->j_matrix[i][j] /= norm;
+      this->j_matrix[i][j] /= this->base_norm_;
     }
-  }  
+  }
 }
 
 bool Channel::CompatibleChannels(Channel c1, Channel c2) {
@@ -124,14 +124,8 @@ bool Channel::CompatibleChannels(Channel c1, Channel c2) {
   return false;
 }
 
-std::ostream& operator<< (std::ostream& stream, const Channel& c) {
-  for( int i=0; i<c.n_in_; i++ ) {
-    for( int j=0; j<c.n_out_; j++ ) {
-      stream << c.c_matrix[i][j] << " ";
-    } 
-    if( (i+1) != c.n_in_ ) 
-      stream << std::endl;
-  }
+std::ostream& operator<< (std::ostream& stream, const Channel& channel) {
+  stream << channel.to_string();
   return stream;
 }
 
