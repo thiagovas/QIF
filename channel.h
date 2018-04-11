@@ -15,26 +15,30 @@
 class Channel {
   public:
     Channel(int n_in, int n_out);
-    
+
     // This function parses a channel string.
     void ParseInput(std::string input_str);
-    
+
     // This function returns a string that represents the
     // current channel.
     std::string to_string();
-
-    bool CompatibleChannels(Channel c1, Channel c2);
     
+    // TODO(thiagovas): Describe what this function does.
+    bool CompatibleChannels(Channel c1, Channel c2);
+
     friend std::ostream& operator<< (std::ostream& stream, const Channel& c);
 
 
   private:
     // This is the channel matrix. ( p(y|x) )
     std::vector<std::vector<double> > c_matrix;
+    
     // This is the posterior probability matrix. ( hyper distribution p(x|y) )
     std::vector<std::vector<double> > h_matrix;
+    
     // This is the prior distribution.
     std::vector<double> prior_distribution;
+    
     // This is the output distribution.
     std::vector<double> out_distribution;
 

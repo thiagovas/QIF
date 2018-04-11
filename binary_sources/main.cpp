@@ -1,7 +1,7 @@
 #include <iostream>
 #include <queue>
-#include "lexer.h"
-#include "parser.h"
+#include "../lexer.h"
+#include "../parser.h"
 using namespace std;
 
 void print_parse_tree( struct parse_tree * p )

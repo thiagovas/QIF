@@ -5,15 +5,28 @@ int main() {
 }
 
 Channel::Channel(int n_in, int n_out) : n_in_(n_in), n_out_(n_out) {
+  
+  // The prior is a uniform distribution by default.
+  this->prior_distribution = std::vector<double>(n_in, 1.0f/n_in);
+  
+  
   Randomize();
 }
 
 // This function parses a channel string.
-void Channel::ParseInput(std::string input_str) {}
+void Channel::ParseInput(std::string input_str) {
+  // TODO(thiagovas): Implement this function.
+}
 
 // This function returns a string that represents the
 // current channel.
-// std::string Channel::to_string() {}
+std::string Channel::to_string() {
+  // TODO(thiagovas): Implement this function.
+  //                  The string generated must be recognizable
+  //                  by the ParseInput method.
+  //                  The following piece of code must work:
+  //                  ParseInput(channel.to_string());
+}
 
 // This function transposes the current channel.
 // The input becomes the output, and the output becomes the

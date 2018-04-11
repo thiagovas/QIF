@@ -1,7 +1,7 @@
 CC=g++
 CC_FLAGS=-O2 -Wall -std=c++11
 BIN=./bin
-SRC=./src
+SRC=..
 
 all: prep build
 
@@ -15,7 +15,7 @@ build: main.o  parser.o lexer.o
 
 
 main.o: parser.o lexer.o
-	$(CC) -c $(SRC)/main.cpp -o $(BIN)/main.o $(CC_FLAGS)
+	$(CC) -c main.cpp -o $(BIN)/main.o $(CC_FLAGS)
 
 
 parser.o: lexer.o
