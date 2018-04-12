@@ -69,12 +69,18 @@ class Channel {
     double NormalizedMutualInformation() const;
     double SymmetricUncertainty() const;
     
-    double BayesVulnerabilityPrior() const;
-    double BayesVulnerabilityPosterior() const;
+    double BayesVulnerabilityPrior() const; // V(X)
+    double BayesVulnerabilityOut() const; // V(Y)
+    double BayesVulnerabilityPosterior() const; // V(X|Y)
+    double BayesVulnerabilityReversePosterior() const; // V(Y|X)
     
-    double BayesLeakagePrior() const;
-    double BayesLeakagePosterior() const;
-    double BayesLeakageHyper() const;
+    // Multiplicative Leakages.
+    double BayesLeakageMultPosterior() const; // V(X|Y) / V(X)
+    double BayesLeakageMultReversePosterior() const; // V(Y|X) / V(Y)
+    
+    // Additive leakages.
+    double BayesLeakageAddPosterior() const; // V(X|Y) - V(X)
+    double BayesLeakageAddReversePosterior() const; // V(Y|X) - V(Y)
 
 
   private:
