@@ -12,7 +12,7 @@
 
 class Channel {
   public:
-    Channel(int n_in, int n_out);
+    Channel(int n_in=2, int n_out=2);
 
     int n_in() const {
       return this->n_in_;
@@ -48,11 +48,6 @@ class Channel {
     // This function randomizes the current channel.
     // Maintaining the channel dimensions.
     void Randomize();
-
-    // This function transposes the current channel.
-    // The input becomes the output, and the output becomes the
-    // input; matrix-wise we'll have p(x|y) instead of p(y|x).
-    void Transpose();
     
 
     // TODO(thiagovas): Improvement. Create a namespace 'metrics',

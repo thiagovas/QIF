@@ -9,11 +9,12 @@
 
 Channel::Channel(int n_in, int n_out) : n_in_(n_in), n_out_(n_out) {
   this->Reset();
+  this->Randomize();
 }
 
 
 // This function resets the class to an initial state.
-void Channel::Reset() { 
+void Channel::Reset() {
   // The prior is a uniform distribution by default.
   this->prior_distribution.resize(this->n_in_, 1.0f/this->n_in_);
   this->out_distribution.resize(this->n_out_, 0);
@@ -27,28 +28,53 @@ void Channel::Reset() {
   this->c_matrix.resize(this->n_in_, std::vector<double>(this->n_out_, 0));
   this->h_matrix.resize(this->n_in_, std::vector<double>(this->n_out_, 0));
   this->j_matrix.resize(this->n_in_, std::vector<double>(this->n_out_, 0));
-
-  Randomize();
 }
 
 
 // This function parses a channel string.
 void Channel::ParseInput(std::string input_str) {
-  // TODO(thiagovas): Implement this function.
+  std::stringstream ss;
+  ss << input_str;
+
+  ss >> this->n_in_;
+  ss >> this->n_out_;
+  ss >> this->base_norm_;
+  
+  // Initializing every class property.
+  this->Reset();
+  
+  for(unsigned i = 0; i < this->j_matrix.size(); i++)
+    for(unsigned j = 0; j < this->j_matrix.size(); j++)
+      ss >> this->j_matrix[i][j];
+  
+  for(unsigned i = 0; i < this->prior_distribution.size(); i++)
+    ss >> this->prior_distribution[i]; 
+  
+  for( int i=0; i<this->n_in_; i++ ) {
+    for( int j=0; j<this->n_out_; j++ ) {
+      this->c_matrix[i][j] = this->j_matrix[i][j] / this->prior_distribution[i];
+      this->out_distribution[j] += this->j_matrix[i][j];
+
+      this->max_pinput[i] = std::max(this->max_pinput[i], this->j_matrix[i][j]);
+      this->max_poutput[j] = std::max(this->max_poutput[j], this->j_matrix[i][j]);
+    }
+  }
+
+  for( int i=0; i<this->n_in_; i++ ) {
+    for( int j=0; j<this->n_out_; j++ ) {
+      this->h_matrix[i][j] = this->j_matrix[i][j] / this->out_distribution[j];
+    }
+  }
 }
 
 // This function returns a string that represents the
 // current channel.
 std::string Channel::to_string() const {
-  // TODO(thiagovas): Make sure the string generated is recognizable
-  //                  by the ParseInput method.
-  //                  The following piece of code must work:
-  //                  ParseInput(channel.to_string());
-  
   // Standard output:
   // First line: Two integers separated by a space: n_in n_out
+  // Second line: The base_norm_
   // Follows the j_matrix printed in n_in lines
-  // The n_in+2 line contains the prior distribution.
+  // The n_in+3 line contains the prior distribution.
   
   
   std::stringstream ss;
@@ -56,6 +82,8 @@ std::string Channel::to_string() const {
   ss << std::fixed << std::setprecision(8);
 
   ss << this->n_in_ << " " << this->n_out_ << std::endl;
+  ss << this->base_norm_ << std::endl;
+
   for(unsigned i = 0; i < this->j_matrix.size(); i++)
   {
     if(not this->j_matrix[i].empty())
@@ -74,30 +102,6 @@ std::string Channel::to_string() const {
   return ss.str();
 }
 
-
-// This function transposes the current channel.
-// The input becomes the output, and the output becomes the
-// input; matrix-wise we'll have p(x|y) instead of p(y|x).
-void Channel::Transpose() {
-  // TODO(thiagovas): Check the correctness of this method.
-  std::vector<double> p_y;
-  this->h_matrix = this->c_matrix;
-  for( int i=0; i<this->n_in_; i++ ) {
-    for( int j=0; j<this->n_out_; j++ ) {
-      this->h_matrix[i][j] = this->h_matrix[i][j] * this->prior_distribution[i];
-    }
-  }
-
-  for( int i=0; i<this->n_out_; i++ ) {
-    p_y.push_back(0.0);
-    for( int j=0; j<this->n_in_; j++ ) {
-      p_y[i] += this->h_matrix[j][i]; 
-    }
-    for( int j=0; j<this->n_in_; j++ ) {
-      this->h_matrix[j][i] /= p_y[i];
-    }
-  } 
-}
 
 // This function randomizes the current channel.
 // Maintaining the channel dimensions.
