@@ -218,7 +218,7 @@ double Channel::NormalizedMutualInformation() const {
 }
 
 double Channel::SymmetricUncertainty() const {
-  return 2*this->MutualInformation() / (this->ShannonEntropyPrior() + this->ShannonEntropyOut())
+  return 2*this->MutualInformation() / (this->ShannonEntropyPrior() + this->ShannonEntropyOut());
 }
 
 double Channel::BayesVulnerabilityPrior() const {
@@ -229,7 +229,7 @@ double Channel::BayesVulnerabilityPrior() const {
   return vulnerability;
 }
     
-double BayesVulnerabilityOut() const {
+double Channel::BayesVulnerabilityOut() const {
   double vulnerability = 0;
   for(int i = 0; i < this->n_out_; i++) {
     vulnerability = std::max(vulnerability, this->out_distribution[i]);
@@ -254,19 +254,19 @@ double Channel::BayesVulnerabilityReversePosterior() const {
 }
     
 
-double BayesLeakageMultPosterior() const {
-  return this->BayesVulnerabilityPosterior / this->BayesVulnerabilityPrior();
+double Channel::BayesLeakageMultPosterior() const {
+  return this->BayesVulnerabilityPosterior() / this->BayesVulnerabilityPrior();
 }
 
-double BayesLeakageMultReversePosterior() const {
+double Channel::BayesLeakageMultReversePosterior() const {
   return this->BayesVulnerabilityPosterior() / this->BayesVulnerabilityOut();
 }
 
-double BayesLeakageAddPosterior() const {
-  return this->BayesVulnerabilityPosterior - this->BayesVulnerabilityPrior();
+double Channel::BayesLeakageAddPosterior() const {
+  return this->BayesVulnerabilityPosterior() - this->BayesVulnerabilityPrior();
 
 }
 
-double BayesLeakageAddReversePosterior() const {
+double Channel::BayesLeakageAddReversePosterior() const {
   return this->BayesVulnerabilityPosterior() - this->BayesVulnerabilityOut();
 }
