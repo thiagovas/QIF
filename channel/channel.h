@@ -1,14 +1,10 @@
-// channel.h
-#ifndef channel_h
-#define channel_h
+#ifndef _channel_channel_h
+#define _channel_channel_h
 #include <string>
 #include <vector>
 #include <iostream>
 
-// Channel matrix
-// x_0 -> y_0, y_1, ..., y_m
-// ...
-// x_n -> y_0, y_1, ..., y_m
+namespace channel {
 
 class Channel {
   public:
@@ -28,6 +24,22 @@ class Channel {
     
     std::vector<std::string> out_names() const {
       return this->out_names_;
+    }
+    
+    const std::vector<double>& prior_distribution() const {
+      return this->prior_distribution_;
+    }
+    
+    const std::vector<double>& out_distribution() const {
+      return this->out_distribution_;
+    }
+
+    const std::vector<double>& max_pinput() const {
+      return this->max_pinput_;
+    }
+
+    const std::vector<double>& max_poutput() const {
+      return this->max_poutput_;
     }
 
     // This function parses a channel string.
@@ -50,10 +62,6 @@ class Channel {
     void Randomize();
     
 
-    // TODO(thiagovas): Improvement. Create a namespace 'metrics',
-    //                    or something like that.
-    // OLD METRICS
-    // In bits
     double ShannonEntropyPrior() const;
     double ShannonEntropyOut() const;
     double ConditionalEntropy() const;
@@ -63,42 +71,28 @@ class Channel {
     double MutualInformation() const;
     double NormalizedMutualInformation() const;
     double SymmetricUncertainty() const;
-    
-    double BayesVulnerabilityPrior() const; // V(X)
-    double BayesVulnerabilityOut() const; // V(Y)
-    double BayesVulnerabilityPosterior() const; // V(X|Y)
-    double BayesVulnerabilityReversePosterior() const; // V(Y|X)
-    
-    // Multiplicative Leakages.
-    double BayesLeakageMultPosterior() const; // V(X|Y) / V(X)
-    double BayesLeakageMultReversePosterior() const; // V(Y|X) / V(Y)
-    
-    // Additive leakages.
-    double BayesLeakageAddPosterior() const; // V(X|Y) - V(X)
-    double BayesLeakageAddReversePosterior() const; // V(Y|X) - V(Y)
-
 
   private:
     // This is the channel matrix. ( p(y|x) )
-    std::vector<std::vector<double> > c_matrix;
+    std::vector<std::vector<double> > c_matrix_;
     
     // This is the posterior probability matrix. ( hyper distribution p(x|y) )
-    std::vector<std::vector<double> > h_matrix;
+    std::vector<std::vector<double> > h_matrix_;
     
     // This is the prior distribution.
-    std::vector<double> prior_distribution;
+    std::vector<double> prior_distribution_;
     
     // This is the output distribution.
-    std::vector<double> out_distribution;
+    std::vector<double> out_distribution_;
 
     // This is the joint matrix. ( p(x,y) )
-    std::vector<std::vector<double> > j_matrix;
+    std::vector<std::vector<double> > j_matrix_;
 
     // The maximum p(x, y) per x; used by the bayes' metrics.
-    std::vector<double> max_pinput;
+    std::vector<double> max_pinput_;
 
     // The maximum p(x, y) per y; used by the bayes' metrics.
-    std::vector<double> max_poutput;
+    std::vector<double> max_poutput_;
 
     // These ints keep the number of input lines we have,
     // and the number of output lines.
@@ -111,5 +105,7 @@ class Channel {
     // each output line
     std::vector<std::string> in_names_, out_names_;
 };
+
+} // namespace channel
 
 #endif

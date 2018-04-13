@@ -9,6 +9,7 @@
 # Compiled Object files
 bin/
 main
+brutao
 channel_tst
 *.slo
 *.lo
