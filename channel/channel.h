@@ -52,7 +52,8 @@ class Channel {
     // current channel.
     std::string to_string() const;
     
-    // TODO(thiagovas): Describe what this function does.
+    // Two channels are compatible if they have the same input set.
+    // This function checks that.
     bool CompatibleChannels(const Channel& c1, const Channel& c2) const;
 
     friend std::ostream& operator<< (std::ostream& stream, const Channel& c);
