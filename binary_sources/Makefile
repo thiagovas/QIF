@@ -1,7 +1,6 @@
 CC=g++
 CC_FLAGS=-O2 -Wall -std=c++11
 BIN=./bin
-SRC=..
 
 all: prep build
 
@@ -11,10 +10,10 @@ prep:
 
 
 # Main Rules
-main: parser.o lexer.o main.o
+main: prep parser.o lexer.o main.o
 	$(CC) $(BIN)/parser.o $(BIN)/lexer.o $(BIN)/main.o -o main $(CC_FLAGS)
 
-channel_tst: channel.o channel_tst.o
+channel_tst: prep channel.o channel_tst.o
 	$(CC) $(BIN)/channel.o $(BIN)/channel_tst.o -o channel_tst $(CC_FLAGS)
 	
 
@@ -30,7 +29,7 @@ main.o:
 
 # Unique compiles from other folders.
 channel.o:
-	$(CC) -c $(SRC)/channel.cpp -o $(BIN)/channel.o $(CC_FLAGS)
+	$(CC) -c ../channel/channel.cpp -o $(BIN)/channel.o $(CC_FLAGS)
 
 parser.o: lexer.o
 	$(CC) -c $(SRC)/parser.cpp -o $(BIN)/parser.o $(CC_FLAGS)
