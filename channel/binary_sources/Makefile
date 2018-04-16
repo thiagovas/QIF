@@ -13,11 +13,17 @@ prep:
 brutao: prep brutao.o channel.o bayes.o
 	$(CC) $(BIN)/brutao.o $(BIN)/channel.o $(BIN)/bayes.o -o brutao $(CC_FLAGS)
 
+randombrutao: prep randombrutao.o channel.o bayes.o
+	$(CC) $(BIN)/random_brutao.o $(BIN)/channel.o $(BIN)/bayes.o -o random_brutao $(CC_FLAGS)
+
 
 
 # Unique compiles from this folder.
 brutao.o: 
 	$(CC) -c brutao.cpp -o $(BIN)/brutao.o $(CC_FLAGS)
+
+randombrutao.o: 
+	$(CC) -c random_brutao.cpp -o $(BIN)/random_brutao.o $(CC_FLAGS)
 
 
 
