@@ -17,8 +17,7 @@ namespace channel {
   Channel::Channel(const std::vector<std::vector<double> >& j_matrix,
       const std::vector<double>& prior_distribution,
       int base_norm) {
-    this->Reset();
-    this->base_norm_ = base_norm_;
+    this->base_norm_ = base_norm;
     this->build_channel(j_matrix, prior_distribution);
   }
 
@@ -217,6 +216,8 @@ namespace channel {
       std::vector<double> prior_distribution) {
     this->n_in_ = j_matrix.size();
     this->n_out_ = j_matrix[0].size();
+    this->Reset();
+    
     this->j_matrix_ = j_matrix;
     this->prior_distribution_ = prior_distribution;
 

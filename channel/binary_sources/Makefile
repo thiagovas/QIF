@@ -13,8 +13,11 @@ prep:
 brutao: prep brutao.o channel.o bayes.o
 	$(CC) $(BIN)/brutao.o $(BIN)/channel.o $(BIN)/bayes.o -o brutao $(CC_FLAGS)
 
-randombrutao: prep randombrutao.o channel.o bayes.o
+random_brutao: prep randombrutao.o channel.o bayes.o
 	$(CC) $(BIN)/random_brutao.o $(BIN)/channel.o $(BIN)/bayes.o -o random_brutao $(CC_FLAGS)
+
+brutao_memefficient: prep brutao_memefficient.o channel.o bayes.o
+	$(CC) $(BIN)/brutao_memefficient.o $(BIN)/channel.o $(BIN)/bayes.o -o brutao_memefficient $(CC_FLAGS)
 
 
 
@@ -24,6 +27,9 @@ brutao.o:
 
 randombrutao.o: 
 	$(CC) -c random_brutao.cpp -o $(BIN)/random_brutao.o $(CC_FLAGS)
+
+brutao_memefficient.o: 
+	$(CC) -c brutao_memefficient.cpp -o $(BIN)/brutao_memefficient.o $(CC_FLAGS)
 
 
 
