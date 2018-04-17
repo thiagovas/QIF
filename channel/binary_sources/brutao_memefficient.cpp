@@ -26,6 +26,8 @@ using namespace channel::vulnerability;
 #define MAX_OUTPUT 2
 
 vector<double> prior_distribution;
+Channel best_c1, best_c2;
+double best_diff1, best_diff2;
 
 
 // This function gets the next vector with size vec.size(),
@@ -99,15 +101,12 @@ void evaluate(const vector<vector<int> >& c1_matrix,
   double diff2 = bLeakageRevPosterior_c2 - bLeakageRevPosterior_c1;
   if(bLeakagePosterior_c1 > bLeakagePosterior_c2 && 
       bLeakageRevPosterior_c1 < bLeakageRevPosterior_c2) {
-        cout << "OIA: " << c1_matrix.size() << " X " <<
-                c1_matrix[0].size() << endl;
-        cout << c1.to_string() << endl;
-        cout << c2.to_string() << endl;
-        cout << b.LeakageMultPosterior(c1) << " " <<
-                b.LeakageMultPosterior(c2) << endl;
-        cout << b.LeakageMultReversePosterior(c1) << " " <<
-                b.LeakageMultReversePosterior(c2) << endl;
-        cout << endl << endl;
+    if(best_diff1 < diff1 && best_diff2 < diff2) {
+      best_c1 = c1;
+      best_c2 = c2;
+      best_diff1 = diff1;
+      best_diff2 = diff2;
+    }
   }
 }
 
@@ -144,17 +143,28 @@ void brute(vector<vector<int> >& c1_matrix,
 }
 
 int main() {
+  Bayes b;
   for(int i = 2; i <= MAX_INPUT; i++) {
     for(int j = 2; j <= MAX_OUTPUT; j++) {
       cout << "Brute-forcing " << i << " X " << j << " ...\n";
       vector<vector<int> > c1(i, vector<int>(j, 0));
       vector<vector<int> > c2(i, vector<int>(j, 0));
       prior_distribution = vector<double>(i, 1.0f/i);
-
+      
       c1[0][j-1] = BASE_NORM;
+      best_diff1 = -1, best_diff2 = -1;
       brute(c1, c2, 0);
+
+      cout << "OIA: " << i << " X " << j << endl;
+      cout << best_c1.to_string() << endl;
+      cout << best_c2.to_string() << endl;
+      cout << b.LeakageMultPosterior(best_c1) << " " <<
+        b.LeakageMultPosterior(best_c2) << endl;
+      cout << b.LeakageMultReversePosterior(best_c1) << " " <<
+        b.LeakageMultReversePosterior(best_c2) << endl;
+      cout << endl << endl;
     }
   }
-  
+
   return 0;
 }
