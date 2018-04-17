@@ -89,6 +89,19 @@ namespace base {
     return entropy;
   }
 
+  // Returns the guessing entropy of this distribution.
+  double Distribution::GuessingEntropy() const {
+    double entropy = 0; 
+    std::vector<double> sorted_prior = this->pdist();
+    std::sort(sorted_prior.begin(), sorted_prior.end());
+    int i = 1;
+    for(double value : sorted_prior) {
+      if(value > 0)
+        entropy += ((i++)*value);
+    }
+    return entropy;
+  } 
+
   // Returns if the received vector contains a probability distribution.
   bool Distribution::isDistribution(const std::vector<double> &dist) {
     double sum = 0;

@@ -1,6 +1,6 @@
 #ifndef _base_distribution_h
 #define _base_distribution_h
-
+#include <algorithm>
 #include <vector>
 
 namespace base {
@@ -32,6 +32,9 @@ namespace base {
 
       // Returns the shannon entropy of this distribution.
       double ShannonEntropy() const;
+
+      // Returns the guessing entropy
+      double GuessingEntropy() const;
 
       // Returns if the received vector contains a probability distribution.
       bool isDistribution(const std::vector<double> &dist);
