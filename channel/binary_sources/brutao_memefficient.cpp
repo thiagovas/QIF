@@ -22,8 +22,8 @@ using namespace channel::vulnerability;
 #define EPS 1e-4
 
 #define BASE_NORM 20
-#define MAX_INPUT 2
-#define MAX_OUTPUT 2
+#define MAX_INPUT 3
+#define MAX_OUTPUT 3
 
 vector<double> prior_distribution;
 Channel best_c1, best_c2;
@@ -121,7 +121,7 @@ void brute(vector<vector<int> >& c1_matrix,
     evaluate(c1_matrix, c2_matrix);
     return;
   }
-  
+
   if(line == c1_matrix.size()) {
     brute(c1_matrix, c2_matrix, 0, true);
     return;
@@ -133,7 +133,10 @@ void brute(vector<vector<int> >& c1_matrix,
   if(line != 0) {
     (*cur_matrix)[line] = (*cur_matrix)[line-1];
   }
-  else if(fill2) (*cur_matrix)[0] = c1_matrix[0];
+  else if(fill2) {
+    c2_matrix[0] = vector<int>(c2_matrix[0].size(), 0);
+    c2_matrix[0][c2_matrix[0].size()-1] = BASE_NORM;
+  }
 
   while(!final_vector((*cur_matrix)[line])) {
     brute(c1_matrix, c2_matrix, line+1, fill2);
@@ -152,6 +155,7 @@ int main() {
       prior_distribution = vector<double>(i, 1.0f/i);
       
       c1[0][j-1] = BASE_NORM;
+      c2[0][j-1] = BASE_NORM;
       best_diff1 = -1, best_diff2 = -1;
       brute(c1, c2, 0);
 
