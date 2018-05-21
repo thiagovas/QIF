@@ -21,13 +21,14 @@ using namespace channel::vulnerability;
 
 #define EPS 1e-4
 
-#define BASE_NORM 20
 #define MAX_INPUT 3
 #define MAX_OUTPUT 3
 
 vector<double> prior_distribution;
 Channel best_c1, best_c2;
+vector<vector<int> > best_matrix_c1, best_matrix_c2;
 double best_diff1, best_diff2;
+int BASE_NORM = 20;
 
 
 // This function gets the next vector with size vec.size(),
@@ -106,6 +107,8 @@ void evaluate(const vector<vector<int> >& c1_matrix,
       best_c2 = c2;
       best_diff1 = diff1;
       best_diff2 = diff2;
+      best_matrix_c1 = c1_matrix;
+      best_matrix_c2 = c2_matrix;
     }
   }
 }
@@ -145,28 +148,53 @@ void brute(vector<vector<int> >& c1_matrix,
   brute(c1_matrix, c2_matrix, line+1, fill2);
 }
 
+void print_matrix(const vector<vector<int> >& matrix) {
+  for(int i = 0; i < matrix.size(); i++) {
+    for(int j = 0; j < matrix[i].size(); j++) {
+      cout << matrix[i][j] << " ";
+    }
+    cout << endl;
+  }
+}
+
 int main() {
   Bayes b;
+  int i = 3, j = 3;
   for(int i = 2; i <= MAX_INPUT; i++) {
     for(int j = 2; j <= MAX_OUTPUT; j++) {
       cout << "Brute-forcing " << i << " X " << j << " ...\n";
-      vector<vector<int> > c1(i, vector<int>(j, 0));
-      vector<vector<int> > c2(i, vector<int>(j, 0));
-      prior_distribution = vector<double>(i, 1.0f/i);
-      
-      c1[0][j-1] = BASE_NORM;
-      c2[0][j-1] = BASE_NORM;
+      BASE_NORM = 3;
       best_diff1 = -1, best_diff2 = -1;
-      brute(c1, c2, 0);
+      best_matrix_c1 = vector<vector<int> > (i, vector<int>(j, 0));
+      best_matrix_c2 = vector<vector<int> > (i, vector<int>(j, 0));
+      while(++BASE_NORM <= 100) {
+        vector<vector<int> > c1(i, vector<int>(j, 0));
+        vector<vector<int> > c2(i, vector<int>(j, 0));
+        prior_distribution = vector<double>(i, 1.0f/i);
+        
+        cout << "\r" << BASE_NORM << std::flush;
+        c1[0][j-1] = BASE_NORM;
+        c2[0][j-1] = BASE_NORM;
+        brute(c1, c2, 0);
+        if(best_diff1 >= 0 && best_diff2 >= 0) {
+          cout << endl;
+          cout << "OIA: " << i << " X " << j << endl;
+          cout << best_c1.to_string() << endl;
+          print_matrix(best_matrix_c1);
 
-      cout << "OIA: " << i << " X " << j << endl;
-      cout << best_c1.to_string() << endl;
-      cout << best_c2.to_string() << endl;
-      cout << b.LeakageMultPosterior(best_c1) << " " <<
-        b.LeakageMultPosterior(best_c2) << endl;
-      cout << b.LeakageMultReversePosterior(best_c1) << " " <<
-        b.LeakageMultReversePosterior(best_c2) << endl;
-      cout << endl << endl;
+          cout << best_c2.to_string() << endl;
+          print_matrix(best_matrix_c2);
+          
+          cout << "NMI C1: " << best_c1.NormalizedMutualInformation() << endl;
+          cout << "NMI C2: " << best_c2.NormalizedMutualInformation() << endl;
+          cout << b.LeakageMultPosterior(best_c1) << " " <<
+            b.LeakageMultPosterior(best_c2) << endl;
+          cout << b.LeakageMultReversePosterior(best_c1) << " " <<
+            b.LeakageMultReversePosterior(best_c2) << endl;
+          cout << endl << endl;
+        }
+      }
+      cout << endl;
     }
   }
 
