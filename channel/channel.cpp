@@ -135,7 +135,8 @@ namespace channel {
   double Channel::ShannonEntropyPrior() const {
     double entropy = 0;
     for(int i = 0; i < this->n_in_; i++) {
-      entropy += (this->prior_distribution_[i]*log2(1.0f/this->prior_distribution_[i]));
+      if(this->prior_distribution_[i] != 0)
+        entropy += (this->prior_distribution_[i]*log2(1.0f/this->prior_distribution_[i]));
     }
     return entropy;
   }
@@ -143,7 +144,8 @@ namespace channel {
   double Channel::ShannonEntropyOut() const {
     double entropy = 0;
     for(int i = 0; i < this->n_out_; i++) {
-      entropy += (this->out_distribution_[i]*log2(1.0f/this->out_distribution_[i]));
+      if(this->out_distribution_[i] != 0)
+        entropy += (this->out_distribution_[i]*log2(1.0f/this->out_distribution_[i]));
     }
     return entropy;
   }
@@ -154,7 +156,8 @@ namespace channel {
     for(int j = 0; j < this->n_out_; j++) {
       double conditional_entropy_X = 0;
       for(int i = 0; i < this->n_in_; i++) {
-        conditional_entropy_X += (this->h_matrix_[i][j] * log2(1.0f/this->h_matrix_[i][j]));
+        if(this->h_matrix_[i][j] != 0)
+          conditional_entropy_X += (this->h_matrix_[i][j] * log2(1.0f/this->h_matrix_[i][j]));
       }
       entropy += (this->out_distribution_[j] * conditional_entropy_X);
     }
@@ -168,7 +171,8 @@ namespace channel {
     for(int i = 0; i < this->n_in_; i++) {
       double conditional_entropy_Y = 0;
       for(int j = 0; j < this->n_out_; j++) {
-        conditional_entropy_Y += (this->c_matrix_[i][j] * log2(1.0f/this->c_matrix_[i][j]));
+        if(this->c_matrix_[i][j] != 0)
+          conditional_entropy_Y += (this->c_matrix_[i][j] * log2(1.0f/this->c_matrix_[i][j]));
       }
       entropy += (this->prior_distribution_[i] * conditional_entropy_Y);
     }
@@ -180,7 +184,8 @@ namespace channel {
     double entropy = 0;
     for(int i = 0; i < this->n_in_; i++) {
       for(int j = 0; j < this->n_out_; j++) {
-        entropy += (this->j_matrix_[i][j]*log2(1.0f/this->j_matrix_[i][j]));
+        if(this->j_matrix_[i][j] != 0)
+          entropy += (this->j_matrix_[i][j]*log2(1.0f/this->j_matrix_[i][j]));
       }
     }
     return entropy;
@@ -223,7 +228,13 @@ namespace channel {
 
     for(int i = 0; i < this->n_in_; i++) {
       for(int j = 0; j < this->n_out_; j++) {
-        this->c_matrix_[i][j] = this->j_matrix_[i][j] / this->prior_distribution_[i];
+        if(this->prior_distribution_[i] != 0) {
+          this->c_matrix_[i][j] = this->j_matrix_[i][j] / this->prior_distribution_[i];
+        }
+        else {
+          this->c_matrix_[i][j] = 0;
+        }
+
         this->out_distribution_[j] += this->j_matrix_[i][j];
 
         this->max_pinput_[i] = std::max(this->max_pinput_[i], this->j_matrix_[i][j]);
