@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <map>
 
 namespace channel {
 
@@ -10,9 +11,14 @@ namespace channel {
     public:
       Channel(int n_in=2, int n_out=2);
 
-      Channel(const std::vector<std::vector<double> >& j_matrix,
-          const std::vector<double>& prior_distribution,
-          int base_norm=-1);
+      Channel(const std::vector<std::vector<double> >& c_matrix);
+
+      std::string cname() const {
+        return this->cname_;
+      }
+      void set_cname(std::string cname) {
+        this->cname_ = cname;
+      }
 
       int n_in() const {
         return this->n_in_;
@@ -22,9 +28,18 @@ namespace channel {
         return this->n_out_;
       }
 
+      void set_in_names(std::vector<std::string> in_names) {
+        this->in_names_ = in_names;
+      }
+
+      void set_out_names(std::vector<std::string> out_names) {
+        this->out_names_ = out_names;
+      }
+
       std::vector<std::string> in_names() const {
         return this->in_names_;
       }
+
 
       std::vector<std::string> out_names() const {
         return this->out_names_;
@@ -33,6 +48,7 @@ namespace channel {
       const std::vector<double>& prior_distribution() const {
         return this->prior_distribution_;
       }
+
 
       const std::vector<double>& out_distribution() const {
         return this->out_distribution_;
@@ -46,11 +62,25 @@ namespace channel {
         return this->max_poutput_;
       }
 
+      const std::map<std::string,int>& pos_in_names() const {
+        return this->pos_in_names_;
+      }
+
+      const std::map<std::string,int>& pos_out_names() const {
+        return this->pos_out_names_;
+      }
+
       // This function parses a channel string.
-      void ParseInput(std::string input_str);
+      //void ParseInput(std::string input_str);
+
+      // This function parses a channel file.
+      void ParseFile(std::string fname);
 
       // This function resets the class to an initial state.
       void Reset();
+
+      // Make identity channel
+      void Identity();
 
       // This function returns a string that represents the
       // current channel.
@@ -58,7 +88,8 @@ namespace channel {
 
       // Two channels are compatible if they have the same input set.
       // This function checks that.
-      bool CompatibleChannels(const Channel& c1, const Channel& c2) const;
+      static bool CompatibleChannels(const Channel& c1, const Channel& c2);
+
 
       friend std::ostream& operator<< (std::ostream& stream, const Channel& c);
 
@@ -76,8 +107,17 @@ namespace channel {
       double MutualInformation() const;
       double NormalizedMutualInformation() const;
       double SymmetricUncertainty() const;
+      
+      static Channel p(const Channel& c1, const Channel& c2);
+
+      const std::vector<std::vector<double> >& c_matrix() const {
+         return this->c_matrix_;
+      }
 
     private:
+      // Channel Name
+      std::string cname_ = "";
+      
       // This is the channel matrix. ( p(y|x) )
       std::vector<std::vector<double> > c_matrix_;
 
@@ -109,10 +149,18 @@ namespace channel {
       // These vectors keep the names of each input line and
       // each output line
       std::vector<std::string> in_names_, out_names_;
+      std::map<std::string, int> pos_in_names_, pos_out_names_;
+
 
       // Builds this channel from a joint matrix and a prior distribution.
-      void build_channel(std::vector<std::vector<double> > j_matrix,
-          std::vector<double> prior_distribution);
+      //void build_joint(std::vector<std::vector<double> > j_matrix,
+                       //std::vector<double> prior_distribution);
+
+      void build_channel(std::vector<std::vector<double> > c_matrix);
+
+      void build_channel(std::vector<std::vector<double> > c_matrix,
+                         std::vector<double> prior_distribution);
+
   };
 
 } // namespace channel
