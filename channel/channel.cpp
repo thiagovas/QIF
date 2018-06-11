@@ -32,19 +32,19 @@ Channel::Channel(const std::vector<std::vector<double> > & c_matrix,
   this->n_in_  = c_matrix.size();
   this->n_out_ = c_matrix[0].size();
   this->base_norm_ = base_norm;
-  this->build_channel(c_matrix, prior_distribution_);
+  this->build_channel(c_matrix, prior_distribution);
 }
 
 
 // This function resets the class to an initial state.
 void Channel::Reset() {
   // The prior is a uniform distribution by default.
-  this->prior_distribution_.resize(this->n_in_, 1.0f/this->n_in_);
-  this->out_distribution_.resize(this->n_out_, 0);
+  this->prior_distribution_.assign(this->n_in_, 1.0f/this->n_in_);
+  this->out_distribution_.assign(this->n_out_, 0);
 
-  this->max_pinput_.resize(this->n_in_, 0);
+  this->max_pinput_.assign(this->n_in_, 0);
 
-  this->max_poutput_.resize(this->n_out_, 0);
+  this->max_poutput_.assign(this->n_out_, 0);
 
   // Important: The first index of the matrices always represents
   // the x variable.
@@ -138,9 +138,6 @@ void Channel::build_channel(std::vector<std::vector<double> > c_matrix,
   this->c_matrix_ = c_matrix;
   this->prior_distribution_ = prior_distribution;
 
-
-  //Falta preencher a out_distribution, max_pinput, max_poutput, h_matrix, e j_matrix
-  
   
   // Filling j_matrix
   for(int i = 0; i < this->n_in_; i++) {
