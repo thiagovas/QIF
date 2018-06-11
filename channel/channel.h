@@ -13,6 +13,9 @@ namespace channel {
 
       Channel(const std::vector<std::vector<double> >& c_matrix);
 
+      Channel(const std::vector<std::vector<double> > & c_matrix,
+              std::vector<double> prior_distribution);
+
       std::string cname() const {
         return this->cname_;
       }
@@ -71,7 +74,7 @@ namespace channel {
       }
 
       // This function parses a channel string.
-      //void ParseInput(std::string input_str);
+      void ParseInput(std::string input_str);
 
       // This function parses a channel file.
       void ParseFile(std::string fname);
@@ -93,6 +96,12 @@ namespace channel {
 
       friend std::ostream& operator<< (std::ostream& stream, const Channel& c);
 
+      friend Channel operator|| (const Channel& c1, const Channel& c2);
+
+      friend Channel operator* (const Channel& c1, const Channel& c2);
+
+      //Channel operator|| (const Channel& c1, const Channel& c2);
+
       // This function randomizes the current channel.
       // Maintaining the channel dimensions.
       void Randomize();
@@ -108,7 +117,9 @@ namespace channel {
       double NormalizedMutualInformation() const;
       double SymmetricUncertainty() const;
       
-      static Channel p(const Channel& c1, const Channel& c2);
+      //static Channel p(const Channel& c1, const Channel& c2);
+
+      static Channel casc(const Channel& c1, const Channel& c2);
 
       const std::vector<std::vector<double> >& c_matrix() const {
          return this->c_matrix_;

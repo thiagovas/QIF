@@ -19,6 +19,11 @@ namespace channel {
     this->build_channel(c_matrix);
   }
 
+  Channel::Channel(const std::vector<std::vector<double> > & c_matrix,
+                  std::vector<double> prior_distribution) {
+    this->build_channel(c_matrix, prior_distribution_);
+  }
+
   // This function resets the class to an initial state.
   void Channel::Reset() {
     // The prior is a uniform distribution by default.
@@ -70,6 +75,7 @@ namespace channel {
 
     for(int i = 0; i < this->n_in_; i++)
     {
+      ss << this->in_names()[i] << " ";
       for(int j = 0; j < this->n_out_; j++)
         ss << this->c_matrix_[i][j] << " ";
       ss << std::endl;
@@ -119,7 +125,8 @@ namespace channel {
     this->c_matrix_ = c_matrix;
     this->prior_distribution_ = prior_distribution;
   }
-  Channel Channel::p(const Channel & c1, const Channel & c2) {
+  // Parallel Operator
+  Channel operator||(const Channel & c1, const Channel & c2) {
     if(!Channel::CompatibleChannels(c1,c2)) {
       std::cout << "Channels not compatible" << std::endl;
       std::cout << c1 << std::endl;
@@ -152,10 +159,27 @@ namespace channel {
       }
     }
     Channel c3(c_m);
-
     c3.set_in_names(c1.in_names());
     c3.set_out_names(out_);
+    return c3;
+  }
 
+  // Cascade
+  Channel operator*(const Channel& c1, const Channel& c2) {
+    std::vector<std::vector<double> > new_c(c1.n_in());
+    std::vector<std::vector<double> > c1_c = c1.c_matrix();
+    std::vector<std::vector<double> > c2_c = c2.c_matrix();
+    for(int i=0; i<c1.n_in(); i++) {
+      new_c[i].resize(c2.n_out());
+      for(int j=0; j<c2.n_out(); j++) {
+        double sum = 0;
+        for(int k=0; k<c1.n_out(); k++) sum += (c1_c[i][k] * c2_c[k][j]);
+        new_c[i][j] = sum;
+      }
+    }
+    Channel c3(new_c);
+    c3.set_in_names(c1.in_names());
+    c3.set_out_names(c2.out_names());
     return c3;
   }
 
