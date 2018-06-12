@@ -8,3 +8,5 @@ wget https://github.com/bazelbuild/bazel/releases/download/0.14.1/bazel-0.14.1-i
 chmod +x bazel-0.14.1-installer-linux-x86_64.sh
 ./bazel-0.14.1-installer-linux-x86_64.sh --user
 rm bazel-0.14.1-installer-linux-x86_64.sh
+
+echo 'source ~/.bazel/bin/bazel-complete.bash' >> ~/.bashrc
