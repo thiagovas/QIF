@@ -8,13 +8,15 @@ before_install:
     - ./setup.sh
 install:
     # g++6
-    - then sudo apt-get install -qq g++-6
+    - sudo apt-get install -qq g++-6
     - export CXX="g++-6"
     - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
     - sudo apt-get install -qq libtclap-dev libboost-dev cmake
     - sudo apt-get install -qq libgtest-dev
     - sudo apt-get install pkg-config zip g++ zlib1g-dev unzip python
     - export PATH="$PATH:$HOME/bin"
+script:
+    - bazel build ...
 git:
   submodules: true
 notifications:
