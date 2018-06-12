@@ -17,6 +17,7 @@ install:
     - ./setup.sh
 script:
     - bazel build ...
+    - bazel test ...
 git:
   submodules: true
 notifications:
