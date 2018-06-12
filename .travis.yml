@@ -1,0 +1,19 @@
+sudo: required
+language: cpp
+compiler:
+    - gcc
+before_install:
+    - sudo apt-get update
+install:
+    # g++6
+    - if [ "$CXX" == "g++" ]; then sudo apt-get install -qq g++-6; fi
+    - if [ "$CXX" == "g++" ]; then export CXX="g++-6"; fi
+    - sudo apt-get install -qq libtclap-dev libboost-dev cmake
+    - sudo apt-get install -qq libgtest-dev
+    - sudo apt-get install pkg-config zip g++ zlib1g-dev unzip python
+    - export PATH="$PATH:$HOME/bin"
+git:
+  submodules: true
+notifications:
+  email:
+    - thiagovieiraas@gmail.com

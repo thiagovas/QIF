@@ -1,3 +1,6 @@
+# Bazel files
+bazel-*
+
 # Swap Files
 *.swp
 *~
