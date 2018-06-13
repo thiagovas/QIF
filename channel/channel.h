@@ -80,6 +80,10 @@ class Channel {
     const std::vector<std::vector<double> >& c_matrix() const {
         return this->c_matrix_;
     }
+    
+    const std::vector<std::vector<double> >& j_matrix() const {
+        return this->j_matrix_;
+    }
 
     // This function parses a channel string.
     void ParseInput(std::string input_str);
@@ -133,7 +137,7 @@ class Channel {
   private:
     // Channel Name
     std::string cname_ = "";
-    
+
     // This is the channel matrix. ( p(y|x) )
     std::vector<std::vector<double> > c_matrix_;
 
