@@ -24,15 +24,18 @@ int main() {
   ps.ParseFile ("crowds_9/ps");
   //cout << id << is << pd << ps;
   //cout << id << std::endl << is*ps;
-  Channel x1 = Channel::hidden_choice( id*pd, is*(ps*ps), q );
+  Channel x1 = 
+    Channel::hidden_choice( id*pd, is*(ps*ps), q );
   cout << "X1" << endl;
   cout << x1;
 
-  Channel x2 = Channel::hidden_choice( is*ps, x1, p );
+  Channel x2 = 
+    Channel::hidden_choice( is*ps, x1, p );
   cout << "X2" << endl;
   cout << x2;
 
-  Channel x3 = Channel::hidden_choice( id, x2, q);
+  Channel x3 = 
+    Channel::hidden_choice( id, x2, q);
   cout << "X3" << endl;
   cout << x3;
 

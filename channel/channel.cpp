@@ -235,12 +235,14 @@ Channel Channel::hidden_choice (const Channel& c1, const Channel& c2, const doub
   std::vector<std::string> c1_n = c1.out_names();
   std::vector<std::string> c2_n = c2.out_names();
 
-  std::vector<std::string> union_out_names;
-  union_out_names.insert(union_out_names.end(), c1_n.begin(), c1_n.end());
+  std::vector<std::string> union_out_names(c1_n);
   union_out_names.insert(union_out_names.end(), c2_n.begin(), c2_n.end());
 
+  // Removing duplicates
   sort(union_out_names.begin(), union_out_names.end());
-  unique(union_out_names.begin(), union_out_names.end());
+  union_out_names.erase( unique(union_out_names.begin(), union_out_names.end()), 
+                         union_out_names.end());
+
 
   for(int i=0; i<c1.n_in(); i++) {
     c_m[i].assign(union_out_names.size(), 0);
