@@ -19,7 +19,11 @@ random_brutao: prep randombrutao.o channel.o bayes.o
 brutao_memefficient: prep brutao_memefficient.o channel.o bayes.o
 	$(CC) $(BIN)/brutao_memefficient.o $(BIN)/channel.o $(BIN)/bayes.o -o brutao_memefficient $(CC_FLAGS)
 
+dining4: prep dining4.o channel.o bayes.o
+	$(CC) $(BIN)/dining4.o $(BIN)/channel.o $(BIN)/bayes.o -o dining4 $(CC_FLAGS)
 
+crowds9: prep crowds9.o channel.o bayes.o
+	$(CC) $(BIN)/crowds9.o $(BIN)/channel.o $(BIN)/bayes.o -o crowds9 $(CC_FLAGS)
 
 # Unique compiles from this folder.
 brutao.o: 
@@ -31,6 +35,11 @@ randombrutao.o:
 brutao_memefficient.o: 
 	$(CC) -c brutao_memefficient.cpp -o $(BIN)/brutao_memefficient.o $(CC_FLAGS)
 
+dining4.o: 
+	$(CC) -c dining4.cpp -o $(BIN)/dining4.o $(CC_FLAGS)
+
+crowds9.o:
+	$(CC)	-c	crowds9.cpp	-o	$(BIN)/crowds9.o	$(CC_FLAGS)
 
 
 # Unique compiles from other folders.

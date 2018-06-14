@@ -85,6 +85,14 @@ class Channel {
         return this->j_matrix_;
     }
 
+    const int out_index(std::string s) const {
+        return this->pos_out_names_.at(s);
+    }
+
+    void insert_out_index(std::string s, int i) {
+        this->pos_out_names_[s] = i;
+    }
+
     // This function parses a channel string.
     void ParseInput(std::string input_str);
 
@@ -112,7 +120,7 @@ class Channel {
 
     friend Channel operator* (const Channel& c1, const Channel& c2);
 
-    //Channel operator|| (const Channel& c1, const Channel& c2);
+    static Channel hidden_choice (const Channel& c1, const Channel& c2, const double prob);
 
     // This function randomizes the current channel.
     // Maintaining the channel dimensions.
@@ -128,11 +136,6 @@ class Channel {
     double MutualInformation() const;
     double NormalizedMutualInformation() const;
     double SymmetricUncertainty() const;
-    
-    //static Channel p(const Channel& c1, const Channel& c2);
-
-    static Channel casc(const Channel& c1, const Channel& c2);
-
 
   private:
     // Channel Name
@@ -170,7 +173,7 @@ class Channel {
     // each output line
     std::vector<std::string> in_names_, out_names_;
 
-    // TODO(thiagovas): What are these?
+    // Maps input/output names to their index
     std::map<std::string, int> pos_in_names_, pos_out_names_;
 
     void build_channel(std::vector<std::vector<double> > c_matrix);

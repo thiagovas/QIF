@@ -183,7 +183,6 @@ Channel operator||(const Channel & c1, const Channel & c2) {
   std::vector<std::vector<double> > c1_c = c1.c_matrix();
   std::vector<std::vector<double> > c2_c = c2.c_matrix();
 
-  // TODO MAP OUTPUT
   int col_pos = 0;
   for(int i=0; i<c1.n_out(); i++) {
     for(int j=0; j<c2.n_out(); j++) {
@@ -219,14 +218,67 @@ Channel operator*(const Channel& c1, const Channel& c2) {
       new_c[i][j] = sum;
     }
   }
-
   // Is the prior of c3 always uniform?
   Channel c3(new_c);
   c3.set_in_names(c1.in_names());
   c3.set_out_names(c2.out_names());
+  for(int i=0; i<(int)c2.out_names().size(); i++)
+    c3.insert_out_index(c3.out_names()[i], i); 
   return c3;
 }
 
+Channel Channel::hidden_choice (const Channel& c1, const Channel& c2, const double prob) {
+  std::vector<std::vector<double> > c_m(c1.n_in());
+  std::vector<std::vector<double> > c1_m = c1.c_matrix();
+  std::vector<std::vector<double> > c2_m = c2.c_matrix();
+
+  std::vector<std::string> c1_n = c1.out_names();
+  std::vector<std::string> c2_n = c2.out_names();
+
+  std::vector<std::string> union_out_names;
+  union_out_names.insert(union_out_names.end(), c1_n.begin(), c1_n.end());
+  union_out_names.insert(union_out_names.end(), c2_n.begin(), c2_n.end());
+
+  sort(union_out_names.begin(), union_out_names.end());
+  unique(union_out_names.begin(), union_out_names.end());
+
+  for(int i=0; i<c1.n_in(); i++) {
+    c_m[i].assign(union_out_names.size(), 0);
+    for(int j=0; j<(int)union_out_names.size(); j++) {
+      bool f1 = false;
+      bool f2 = false;
+
+      int c1_j, c2_j;
+
+      if( find(c1_n.begin(), c1_n.end(), union_out_names[j]) != c1_n.end() ) 
+        f1 = true;
+      if( find(c2_n.begin(), c2_n.end(), union_out_names[j]) != c2_n.end() )
+        f2 = true;
+
+      if( f1 && f2 ) {
+        c1_j = c1.out_index(union_out_names[j]);
+        c2_j = c2.out_index(union_out_names[j]);
+        c_m[i][j] = (prob)*(c1_m[i][c1_j]) + (1-prob)*(c2_m[i][c2_j]);
+      }
+      else if( f1 ) {
+        c1_j = c1.out_index(union_out_names[j]);
+        c_m[i][j] = (prob)*(c1_m[i][c1_j]);
+      }
+      else if( f2 ) {
+        c2_j = c2.out_index(union_out_names[j]);
+        c_m[i][j] = (1-prob)*(c2_m[i][c2_j]);
+      }
+      else 
+        std::cout << "deu ruim no find" << std::endl;
+    }
+  }
+  Channel c3(c_m);
+  c3.set_in_names(c1_n);
+  c3.set_out_names(union_out_names);
+  for(int i=0; i<(int)union_out_names.size(); i++)
+    c3.insert_out_index(union_out_names[i], i);
+  return c3; 
+}
 
 // This function parses a channel string.
 void Channel::ParseInput(std::string input_str) {
@@ -243,6 +295,9 @@ void Channel::ParseInput(std::string input_str) {
   std::string s;
   this->in_names_.resize(this->n_in_);
   this->out_names_.resize(this->n_out_);
+
+  for(int i=0; i<this->n_in_; i++)  pos_in_names_[in_names_[i]] = i;
+  for(int i=0; i<this->n_out_; i++) pos_out_names_[out_names_[i]] = i;
 
   for(int i = 0; i < this->n_in_; i++) {
     f >> this->in_names_[i];
