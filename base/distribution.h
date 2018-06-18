@@ -111,7 +111,7 @@ namespace base {
 
 
       // Epsilon value used by this class to make comparisons between floats.
-      const double eps = 1e-8;
+      const double eps = 1e-6;
 
 
       // --------------------------------------------------------------------------

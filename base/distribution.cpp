@@ -37,7 +37,7 @@ namespace base {
 
   // Returns a uniform probability distribution with 'size' items.
   Distribution Distribution::GenerateUniformDistribution(int size) {
-    std::vector<double> vdist(size, 1.0f/size);
+    std::vector<double> vdist(size, ((double)1.0f)/size);
     return Distribution(vdist, size);
   }
 
@@ -47,7 +47,7 @@ namespace base {
                                                 long long& base_norm) {
     std::mt19937 rng;
     rng.seed(std::random_device()());
-    std::uniform_int_distribution<std::mt19937::result_type> dist(0,1e8);
+    std::uniform_int_distribution<std::mt19937::result_type> dist(0,1e7);
     vdist.resize(size, 0);
     base_norm = 0;
     
@@ -104,8 +104,10 @@ namespace base {
 
   // Returns if the received vector contains a probability distribution.
   bool Distribution::isDistribution(const std::vector<double> &dist) {
+    if(dist.size() == 0) return true;
+    
     double sum = 0;
-    for(int value : dist) {
+    for(double value : dist) {
       if(value < 0) return false;
       sum += value;
     }
