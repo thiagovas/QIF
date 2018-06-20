@@ -47,7 +47,6 @@ class Channel {
       return this->in_names_;
     }
 
-
     std::vector<std::string> out_names() const {
       return this->out_names_;
     }
@@ -55,7 +54,6 @@ class Channel {
     const std::vector<double>& prior_distribution() const {
       return this->prior_distribution_;
     }
-
 
     const std::vector<double>& out_distribution() const {
       return this->out_distribution_;
@@ -76,11 +74,11 @@ class Channel {
     const std::map<std::string,int>& pos_out_names() const {
       return this->pos_out_names_;
     }
-    
+
     const std::vector<std::vector<double> >& c_matrix() const {
         return this->c_matrix_;
     }
-    
+
     const std::vector<std::vector<double> >& j_matrix() const {
         return this->j_matrix_;
     }

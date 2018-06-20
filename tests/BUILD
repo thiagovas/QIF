@@ -10,6 +10,17 @@ cc_test(
 )
 
 cc_test(
+    name = "channelmeasures",
+    srcs = ["channelmeasures.cpp"],
+    copts = ["-Iexternal/googletest/googletest/include"],
+    deps = [
+      "@gtest//:gtest",
+      "@gtest//:gtest_main",
+      "//channel:channel",
+    ],
+)
+
+cc_test(
     name = "distribution",
     srcs = ["distribution.cpp"],
     copts = ["-Iexternal/googletest/googletest/include"],
