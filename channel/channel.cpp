@@ -418,7 +418,7 @@ double Channel::GuessingEntropy() const {
 
 // 
 double Channel::MutualInformation() const {
-  return (this->ShannonEntropyPrior() - this->ConditionalEntropy());
+  return (this->ShannonEntropyPrior() - this->ConditionalEntropyHyper());
 }
 
 double Channel::NormalizedMutualInformation() const {
