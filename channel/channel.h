@@ -118,7 +118,11 @@ class Channel {
 
     friend Channel operator* (const Channel& c1, const Channel& c2);
 
-    static Channel hidden_choice (const Channel& c1, const Channel& c2, const double prob);
+    static Channel hidden_choice (const Channel& c1, const double prob, 
+                                  const Channel& c2);
+
+    static Channel visible_choice (const Channel& c1, const double prob, 
+                                   const Channel& c2);
 
     // This function randomizes the current channel.
     // Maintaining the channel dimensions.

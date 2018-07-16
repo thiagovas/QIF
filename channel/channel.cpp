@@ -227,7 +227,9 @@ Channel operator*(const Channel& c1, const Channel& c2) {
   return c3;
 }
 
-Channel Channel::hidden_choice (const Channel& c1, const Channel& c2, const double prob) {
+
+static Channel hidden_choice (const Channel& c1, const double prob, 
+                              const Channel& c2) {
   std::vector<std::vector<double> > c_m(c1.n_in());
   std::vector<std::vector<double> > c1_m = c1.c_matrix();
   std::vector<std::vector<double> > c2_m = c2.c_matrix();
@@ -319,6 +321,29 @@ void Channel::ParseInput(std::string input_str) {
   this->build_channel(this->c_matrix_, this->prior_distribution_);
 }
 
+static Channel visible_choice (const Channel& c1, const double prob, 
+                               const Channel& c2) {
+
+  std::vector<std::vector<double> > c_m(c1.n_in());
+  std::vector<std::string> new_output(c1.out_names());
+  new_output.insert(new_output.end(), c2.out_names().begin(), 
+                    c2.out_names().end());
+
+  for(int i=0; i<c1.n_in(); i++) {
+    c_m[i].assign(new_output.size(), 0);
+    int j = 0;
+    for(auto it : c1.c_matrix()[i])
+      c_m[i][j++] = prob * it;
+    for(auto it : c2.c_matrix()[i])
+      c_m[i][j++] = (1-prob) * it;
+  }
+  Channel c3(c_m);
+  c3.set_in_names(c1.out_names());
+  c3.set_out_names(new_output);
+  for(int i=0; i<(int)new_output.size(); i++)
+    c3.insert_out_index(new_output[i], i);
+  return c3; 
+}
 
 // This function randomizes the current channel.
 // Maintaining the channel dimensions.
