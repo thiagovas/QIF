@@ -228,8 +228,8 @@ Channel operator*(const Channel& c1, const Channel& c2) {
 }
 
 
-static Channel hidden_choice (const Channel& c1, const double prob, 
-                              const Channel& c2) {
+Channel Channel::hidden_choice (const Channel& c1, const double prob,
+                                       const Channel& c2) {
   std::vector<std::vector<double> > c_m(c1.n_in());
   std::vector<std::vector<double> > c1_m = c1.c_matrix();
   std::vector<std::vector<double> > c2_m = c2.c_matrix();
@@ -321,8 +321,8 @@ void Channel::ParseInput(std::string input_str) {
   this->build_channel(this->c_matrix_, this->prior_distribution_);
 }
 
-static Channel visible_choice (const Channel& c1, const double prob, 
-                               const Channel& c2) {
+Channel Channel::visible_choice (const Channel& c1, const double prob, 
+                                        const Channel& c2) {
 
   std::vector<std::vector<double> > c_m(c1.n_in());
   std::vector<std::string> new_output(c1.out_names());

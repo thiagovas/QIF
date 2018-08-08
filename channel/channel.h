@@ -82,6 +82,10 @@ class Channel {
     const std::vector<std::vector<double> >& j_matrix() const {
         return this->j_matrix_;
     }
+    
+    const std::vector<std::vector<double> >& h_matrix() const {
+        return this->h_matrix_;
+    }
 
     const int out_index(std::string s) const {
         return this->pos_out_names_.at(s);
