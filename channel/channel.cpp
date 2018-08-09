@@ -454,4 +454,33 @@ double Channel::SymmetricUncertainty() const {
   return 2*this->MutualInformation() / (this->ShannonEntropyPrior() + this->ShannonEntropyOut());
 }
 
+double Channel::PriorGVun(std::vector<std::vector<double> > g) const {
+	double max_ = 0;
+	for(int w_i = 0; w_i<(int)g.size(); w_i++) {
+		double max_w = 0;
+		for(int x_i = 0; x_i<this->n_in(); x_i++) {
+			max_w += this->prior_distribution()[x_i] * g[w_i][x_i];
+		}
+		max_ = std::max(max_, max_w);
+	}
+	return max_;
+}
+
+double Channel::PostGVun(std::vector<std::vector<double> > g) const {
+	double sum_ = 0;
+	for(int y_i = 0; y_i<this->n_out(); y_i++) {
+		double max_w = 0;
+		for(int w_i = 0; w_i<(int)g.size(); w_i++) {
+			double new_max_w = 0;
+			for(int x_i = 0; x_i<this->n_in(); x_i++) {
+				new_max_w += this->prior_distribution()[x_i] * 
+					this->c_matrix()[x_i][y_i] * g[w_i][x_i];
+			}
+			max_w = std::max(max_w, new_max_w);
+		}
+		sum_ += max_w;
+	}
+	return sum_;
+}
+
 } // namespace channel
