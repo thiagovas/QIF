@@ -142,6 +142,8 @@ class Channel {
     double MutualInformation() const;
     double NormalizedMutualInformation() const;
     double SymmetricUncertainty() const;
+		double PriorGVun(std::vector<std::vector<double> > g) const;
+		double PostGVun(std::vector<std::vector<double> > g) const;
 
   private:
     // Channel Name
