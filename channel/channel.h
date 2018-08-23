@@ -128,6 +128,14 @@ class Channel {
     static Channel visible_choice (const Channel& c1, const double prob, 
                                    const Channel& c2);
 
+    static Channel visible_conditional (const Channel& c1, 
+                                        std::vector<std::string> A, 
+                                        const Channel& c2);
+    
+    static Channel hidden_conditional (const Channel& c1,
+                                        std::vector<std::string> A,
+                                        const Channel& c2);
+
     // This function randomizes the current channel.
     // Maintaining the channel dimensions.
     void Randomize();

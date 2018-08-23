@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <random>
 #include <sstream>
+#define el std::cout << std::endl;
 
 #include "channel.h"
 
@@ -344,6 +345,99 @@ Channel Channel::visible_choice (const Channel& c1, const double prob,
     c3.insert_out_index(new_output[i], i);
   return c3; 
 }
+
+// This function computes the result channel from using the
+// visible conditional operator (Old visible if then else)
+Channel Channel::visible_conditional (const Channel& c1, 
+                                    std::vector<std::string> A, 
+                                    const Channel& c2) {
+
+  std::vector<std::vector<double> > c_m(c1.n_in());
+
+  std::vector<std::string> new_output(c1.out_names());
+  for(auto it : c2.out_names())
+    new_output.push_back(it);
+
+  std::vector<std::string> input_names = c1.in_names();
+
+  for(int i=0; i<c1.n_in(); i++) {
+    std::string x_name = input_names[i];
+    c_m[i].assign(c1.n_out() + c2.n_out(), 0);
+    auto it = std::find(A.begin(), A.end(), x_name);
+    if(*it == x_name) 
+      for(int j=0; j<c1.n_out(); j++) 
+        c_m[i][j] = c1.c_matrix()[i][j];
+    else 
+      for(int j=0; j<c2.n_out(); j++) 
+        c_m[i][c1.n_out() + j] = c2.c_matrix()[i][j];
+  }
+  Channel c3(c_m);
+  c3.set_in_names(input_names);
+  c3.set_out_names(new_output);
+  for(int i=0; i<(int)new_output.size(); i++)
+    c3.insert_out_index(new_output[i], i);
+  return c3; 
+}
+
+Channel Channel::hidden_conditional (const Channel& c1,
+                                    std::vector<std::string> A,
+                                    const Channel& c2) {
+
+  std::vector<std::vector<double> > c_m(c1.n_in());
+  std::vector<std::vector<double> > c1_m = c1.c_matrix();
+  std::vector<std::vector<double> > c2_m = c2.c_matrix();
+
+  std::vector<std::string> c1_out = c1.out_names();
+  std::vector<std::string> c2_out = c2.out_names();
+
+  std::vector<std::string> union_out_names(c1_out);
+  union_out_names.insert(union_out_names.end(), c2_out.begin(), c2_out.end());
+
+  // Removing duplicates
+  sort(union_out_names.begin(), union_out_names.end());
+  union_out_names.erase( unique(union_out_names.begin(), union_out_names.end()), 
+                         union_out_names.end());
+
+  std::vector<std::string> input_names = c1.in_names();
+  int new_output_size = union_out_names.size();
+  for(int i=0; i<input_names.size(); i++) {
+    std::string x_name = input_names[i];
+    c_m[i].assign(new_output_size, 0);
+    auto it = std::find(A.begin(), A.end(), x_name);
+    // C1
+    if(*it == x_name) {
+      int c3_output_pos = 0;
+      int c1_output_pos = 0;
+      while(c1_output_pos < c1.n_out()) {
+        if(c1_out[c1_output_pos] == union_out_names[c3_output_pos]) {
+          c_m[i][c3_output_pos] = c1_m[i][c1_output_pos];
+          c1_output_pos++;
+        }
+        c3_output_pos++;
+      }
+    }
+    // C2
+    else {
+      int c3_output_pos = 0;
+      int c2_output_pos = 0;
+      while(c2_output_pos < c2.n_out()) {
+        if(c2_out[c2_output_pos] == union_out_names[c3_output_pos]) {
+          c_m[i][c3_output_pos] = c2_m[i][c2_output_pos];
+          c2_output_pos++;
+        }
+        c3_output_pos++;
+      }
+    }
+  }
+
+  Channel c3(c_m);
+  c3.set_in_names(input_names);
+  c3.set_out_names(union_out_names);
+  for(int i=0; i<(int)union_out_names.size(); i++)
+    c3.insert_out_index(union_out_names[i], i);
+  return c3; 
+}
+
 
 // This function randomizes the current channel.
 // Maintaining the channel dimensions.
