@@ -17,6 +17,17 @@ Channel::Channel(int n_in, int n_out) : n_in_(n_in), n_out_(n_out) {
 
   // Should we call Identity instead?
   this->Randomize();
+  std::vector<std::string> input, output;
+
+  for(int i=0; i<n_in; i++) 
+    input.push_back( "x" + std::to_string(i) );
+
+  for(int i=0; i<n_out; i++) 
+    output.push_back( "y" + std::to_string(i) );
+
+  this->set_in_names(input);
+  this->set_out_names(output);
+  
 }
 
 Channel::Channel(const std::vector<std::vector<double> > & c_matrix,
@@ -171,14 +182,16 @@ void Channel::build_channel(std::vector<std::vector<double> > c_matrix,
 Channel operator||(const Channel & c1, const Channel & c2) {
   if(!Channel::CompatibleChannels(c1,c2)) {
     std::cout << "Channels not compatible" << std::endl;
-    std::cout << c1 << std::endl;
-    std::cout << c2 << std::endl;
     return c1;
   }
-  std::vector<std::string> out_;
+  std::vector<std::string> out_names;
   std::vector<std::vector<double> > c_m(c1.n_in());
-  for(int i=0; i<c1.n_in(); i++) {
-    c_m[i].assign(c1.n_out() * c2.n_out(), 0);
+
+  int c3_rows = c1.n_in();
+  int c3_cols = c1.n_out() * c2.n_out();
+
+  for(int i=0; i<c3_rows; i++) {
+    c_m[i].assign(c3_cols, 0.0);
   }
 
   std::vector<std::vector<double> > c1_c = c1.c_matrix();
@@ -187,13 +200,14 @@ Channel operator||(const Channel & c1, const Channel & c2) {
   int col_pos = 0;
   for(int i=0; i<c1.n_out(); i++) {
     for(int j=0; j<c2.n_out(); j++) {
-      std::string c1_;
-      std::string c2_;
-      c1_ = c1.out_names()[i];
-      c2_ = c2.out_names()[j];
 
-      out_.push_back(c1_ + '.' + c2_);
+      std::string c1_ = c1.out_names()[i];
+      std::string c2_ = c2.out_names()[j];
+
+      out_names.push_back(c1_ + '.' + c2_);
+      //std::cout << out_names[out_names.size()-1] << std::endl;
       for(int k=0; k<c1.n_in(); k++) {
+        //std::cout << i << " " << j << " " << k << std::endl;
         c_m[k][col_pos] = c1_c[k][i] * c2_c[k][j];
       }
       col_pos++;
@@ -201,7 +215,7 @@ Channel operator||(const Channel & c1, const Channel & c2) {
   }
   Channel c3(c_m);
   c3.set_in_names(c1.in_names());
-  c3.set_out_names(out_);
+  c3.set_out_names(out_names);
   return c3;
 }
 
@@ -349,7 +363,7 @@ Channel Channel::visible_choice (const Channel& c1, const double prob,
 // This function computes the result channel from using the
 // visible conditional operator (Old visible if then else)
 Channel Channel::visible_conditional (const Channel& c1, 
-                                    std::vector<std::string> A, 
+                                    std::vector<std::string> &A, 
                                     const Channel& c2) {
 
   std::vector<std::vector<double> > c_m(c1.n_in());
@@ -380,7 +394,7 @@ Channel Channel::visible_conditional (const Channel& c1,
 }
 
 Channel Channel::hidden_conditional (const Channel& c1,
-                                    std::vector<std::string> A,
+                                    std::vector<std::string> &A,
                                     const Channel& c2) {
 
   std::vector<std::vector<double> > c_m(c1.n_in());
@@ -466,15 +480,95 @@ void Channel::Randomize() {
       else {
         this->c_matrix_[i][j] = 0;
       }
-      this->prior_distribution_[i] /= this->base_norm_;
     }
+    this->prior_distribution_[i] /= this->base_norm_;
   }
 
   this->build_channel(this->c_matrix_, this->prior_distribution_);
 }
+////////////////
+// We now define some compositional bounds
+////////////////
+// Upper and Lower bounds
+std::pair<double, double> 
+  Channel::parallel_vulnerability(const Channel& c1, 
+                         const Channel& c2,
+                         std::vector<std::vector<double>> &g) {
+  double lower, upper;
+  double upper_c1 = 0.0, upper_c2 = 0.0;
 
+  // Upper Bound first term
+  for(int y=0; y<c2.n_out(); y++) {
+    double max_ = 0.0;
+    for(int x=0; x<c2.n_in(); x++) {
+      double check = 0.0;
+      for(int w=0; w<g.size(); w++)
+        check += g[w][x];
+      if(check == 0.0)
+        continue;
+      max_ = std::max(max_, c2.c_matrix()[x][y]);
+    }
+    upper_c1 += max_;
+  }
+  upper_c1 *= c2.PostGVun(g);
 
-// Start metrics
+  // Upper Bound second term
+  for(int y=0; y<c2.n_out(); y++) {
+    double max_ = 0.0;
+    for(int x=0; x<c2.n_in(); x++) {
+      double check = 0.0;
+      for(int w=0; w<g.size(); w++)
+        check += g[w][x];
+      if(check == 0.0)
+        continue;
+      max_ = std::max(max_, c1.c_matrix()[x][y]);
+    }
+  }
+  upper_c2 *= c1.PostGVun(g);
+
+  lower = std::max(c1.PostGVun(g), c2.PostGVun(g));
+  upper = std::min(upper_c1, upper_c2);
+
+  return std::pair<double, double>(lower, upper);
+}
+
+std::pair<double, double> 
+  Channel::hidden_choice_vulnerability(const Channel& c1,
+                              const Channel& c2,
+                              const double prob,
+                              std::vector<std::vector<double>> &g) {
+  double lower, upper;
+  lower = std::max( prob*c1.PostGVun(g), (1-prob)*c2.PostGVun(g) );
+  upper = prob*c1.PostGVun(g) + (1 - prob)*c2.PostGVun(g);
+  return std::pair<double, double>(lower, upper);
+}
+std::pair<double, double>
+  Channel::hidden_conditional (const Channel& c1,
+                               const Channel& c2,
+                               const std::vector<std::string> &A) {
+  double lower, upper;
+
+  return std::pair<double, double>(lower, upper);
+}
+// Linear Bounds
+double 
+  Channel::visible_choice_vulnerability(const Channel& c1,
+                                        const Channel& c2,
+                                        const double prob,
+                                        std::vector<std::vector<double>> &g) {
+    return ((prob * c1.PostGVun(g)) + ((1.0 - prob) * c2.PostGVun(g)));
+}
+
+//double 
+//  Channel::visible_conditional (const Channel& c1,
+//                                const Channel& c2,
+//                                const std::vector<std::string> &A) {
+//    
+//}
+
+////////////////
+// We now define some metrics
+////////////////
 double Channel::ShannonEntropyOut() const {
   double entropy = 0;
   for(int i = 0; i < this->n_out_; i++) {
@@ -569,6 +663,24 @@ double Channel::PostGVun(std::vector<std::vector<double> > g) const {
 			for(int x_i = 0; x_i<this->n_in(); x_i++) {
 				new_max_w += this->prior_distribution()[x_i] * 
 					this->c_matrix()[x_i][y_i] * g[w_i][x_i];
+			}
+			max_w = std::max(max_w, new_max_w);
+		}
+		sum_ += max_w;
+	}
+	return sum_;
+}
+
+double Channel::PostGVun(std::vector<double> prior_distribution,
+                         std::vector<std::vector<double> > g) const {
+	double sum_ = 0;
+	for(int y_i = 0; y_i<this->n_out(); y_i++) {
+		double max_w = 0;
+		for(int w_i = 0; w_i<(int)g.size(); w_i++) {
+			double new_max_w = 0;
+			for(int x_i = 0; x_i<this->n_in(); x_i++) {
+				new_max_w += prior_distribution[x_i] * 
+					           this->c_matrix()[x_i][y_i] * g[w_i][x_i];
 			}
 			max_w = std::max(max_w, new_max_w);
 		}

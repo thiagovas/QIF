@@ -129,13 +129,39 @@ class Channel {
                                    const Channel& c2);
 
     static Channel visible_conditional (const Channel& c1, 
-                                        std::vector<std::string> A, 
+                                        std::vector<std::string> &A, 
                                         const Channel& c2);
     
     static Channel hidden_conditional (const Channel& c1,
-                                        std::vector<std::string> A,
+                                        std::vector<std::string> &A,
                                         const Channel& c2);
 
+    // Upper n Lower Bounds
+    std::pair<double, double> 
+      parallel_vulnerability (const Channel& c1, const Channel& c2,
+                              std::vector<std::vector<double>> &g);
+
+    // Linear Bounds
+    double 
+      visible_choice_vulnerability (const Channel& c1,
+                                    const Channel& c2,
+                                    const double prob,
+                                    std::vector<std::vector<double>> &g);
+
+    std::pair<double, double> 
+      hidden_choice_vulnerability (const Channel& c1,
+                                   const Channel& c2,
+                                   const double prob,
+                                   std::vector<std::vector<double>> &g);
+
+    double 
+      visible_conditional (const Channel& c1,
+                           const Channel& c2,
+                           const std::vector<std::string> &A);
+    std::pair<double, double>
+      hidden_conditional  (const Channel& c1,
+                           const Channel& c2,
+                           const std::vector<std::string> &A);
     // This function randomizes the current channel.
     // Maintaining the channel dimensions.
     void Randomize();
@@ -150,8 +176,12 @@ class Channel {
     double MutualInformation() const;
     double NormalizedMutualInformation() const;
     double SymmetricUncertainty() const;
+    //double PriorGVun() const; // G_ID
 		double PriorGVun(std::vector<std::vector<double> > g) const;
+    //double PostGVun() const; // G_ID
 		double PostGVun(std::vector<std::vector<double> > g) const;
+		double PostGVun(std::vector<double> prior_distribution, 
+                    std::vector<std::vector<double> > g) const;
 
   private:
     // Channel Name
