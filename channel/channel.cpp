@@ -30,6 +30,25 @@ Channel::Channel(int n_in, int n_out) : n_in_(n_in), n_out_(n_out) {
   
 }
 
+Channel::Channel(std::vector<double> prior_distribution, int n_in, int n_out ) 
+                  : n_in_(n_in), n_out_(n_out) {
+  this->Reset();
+
+  // Should we call Identity instead?
+  this->Randomize();
+  this->build_channel(this->c_matrix_, prior_distribution);
+
+  std::vector<std::string> input, output;
+  for(int i=0; i<n_in; i++) 
+    input.push_back( "x" + std::to_string(i) );
+
+  for(int i=0; i<n_out; i++) 
+    output.push_back( "y" + std::to_string(i) );
+
+  this->set_in_names(input);
+  this->set_out_names(output);
+}
+
 Channel::Channel(const std::vector<std::vector<double> > & c_matrix,
                  int base_norm) {
   this->n_in_  = c_matrix.size();
@@ -494,8 +513,11 @@ std::pair<double, double>
   Channel::parallel_vulnerability(const Channel& c1, 
                          const Channel& c2,
                          std::vector<std::vector<double>> &g) {
+
+  std::cout << "Parallel debug" << std::endl;
   double lower, upper;
   double upper_c1 = 0.0, upper_c2 = 0.0;
+
 
   // Upper Bound first term
   for(int y=0; y<c2.n_out(); y++) {
@@ -510,12 +532,13 @@ std::pair<double, double>
     }
     upper_c1 += max_;
   }
-  upper_c1 *= c2.PostGVun(g);
-
+  std::cout << "Upper c1: " << upper_c1 << std::endl;
+  upper_c1 *= c1.PostGVun(g);
+  
   // Upper Bound second term
-  for(int y=0; y<c2.n_out(); y++) {
+  for(int y=0; y<c1.n_out(); y++) {
     double max_ = 0.0;
-    for(int x=0; x<c2.n_in(); x++) {
+    for(int x=0; x<c1.n_in(); x++) {
       double check = 0.0;
       for(int w=0; w<g.size(); w++)
         check += g[w][x];
@@ -523,12 +546,17 @@ std::pair<double, double>
         continue;
       max_ = std::max(max_, c1.c_matrix()[x][y]);
     }
+    upper_c2 += max_;
   }
-  upper_c2 *= c1.PostGVun(g);
+  std::cout << "Upper c2: " << upper_c2 << std::endl;
+  upper_c2 *= c2.PostGVun(g);
+
+  std::cout << upper_c1 << " " << upper_c2 << std::endl;
 
   lower = std::max(c1.PostGVun(g), c2.PostGVun(g));
   upper = std::min(upper_c1, upper_c2);
 
+  std::cout << "##############" << std::endl;
   return std::pair<double, double>(lower, upper);
 }
 

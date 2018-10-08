@@ -10,6 +10,9 @@ namespace channel {
 class Channel {
   public:
     Channel(int n_in=2, int n_out=2);
+  
+    // Random with specific prior distribution
+    Channel(std::vector<double> prior_distribution, int n_in=2, int n_out=2);
 
     Channel(const std::vector<std::vector<double> >& c_matrix,
             int base_norm=0);
