@@ -17,17 +17,7 @@ Channel::Channel(int n_in, int n_out) : n_in_(n_in), n_out_(n_out) {
 
   // Should we call Identity instead?
   this->Randomize();
-  std::vector<std::string> input, output;
-
-  for(int i=0; i<n_in; i++) 
-    input.push_back( "x" + std::to_string(i) );
-
-  for(int i=0; i<n_out; i++) 
-    output.push_back( "y" + std::to_string(i) );
-
-  this->set_in_names(input);
-  this->set_out_names(output);
-  
+  this->setup_default_names();
 }
 
 Channel::Channel(std::vector<double> prior_distribution, int n_in, int n_out ) 
@@ -37,16 +27,7 @@ Channel::Channel(std::vector<double> prior_distribution, int n_in, int n_out )
   // Should we call Identity instead?
   this->Randomize();
   this->build_channel(this->c_matrix_, prior_distribution);
-
-  std::vector<std::string> input, output;
-  for(int i=0; i<n_in; i++) 
-    input.push_back( "x" + std::to_string(i) );
-
-  for(int i=0; i<n_out; i++) 
-    output.push_back( "y" + std::to_string(i) );
-
-  this->set_in_names(input);
-  this->set_out_names(output);
+  this->setup_default_names();
 }
 
 Channel::Channel(const std::vector<std::vector<double> > & c_matrix,
@@ -200,8 +181,8 @@ void Channel::build_channel(std::vector<std::vector<double> > c_matrix,
 // Parallel Operator
 Channel operator||(const Channel & c1, const Channel & c2) {
   if(!Channel::CompatibleChannels(c1,c2)) {
-    std::cout << "Channels not compatible" << std::endl;
-    return c1;
+    std::cerr << "Channels not compatible" << std::endl;
+    exit(1);
   }
   std::vector<std::string> out_names;
   std::vector<std::vector<double> > c_m(c1.n_in());
@@ -271,26 +252,29 @@ Channel Channel::hidden_choice (const Channel& c1, const double prob,
   std::vector<std::string> c1_n = c1.out_names();
   std::vector<std::string> c2_n = c2.out_names();
 
-  std::vector<std::string> union_out_names(c1_n);
-  union_out_names.insert(union_out_names.end(), c2_n.begin(), c2_n.end());
+  std::vector<std::string> union_out_names;
+
+  for(auto it : c1_n)
+    union_out_names.push_back(it);
+  for(auto it : c2_n)
+    union_out_names.push_back(it);
 
   // Removing duplicates
   sort(union_out_names.begin(), union_out_names.end());
   union_out_names.erase( unique(union_out_names.begin(), union_out_names.end()), 
                          union_out_names.end());
 
-
+  int union_size = union_out_names.size();
   for(int i=0; i<c1.n_in(); i++) {
-    c_m[i].assign(union_out_names.size(), 0);
-    for(int j=0; j<(int)union_out_names.size(); j++) {
-      bool f1 = false;
-      bool f2 = false;
-
+    c_m[i].assign(union_size, 0);
+    for(int j=0; j<union_size; j++) {
       int c1_j, c2_j;
+      bool f1 = false, f2 = false;
+      std::string target_out = union_out_names[j];
 
-      if( find(c1_n.begin(), c1_n.end(), union_out_names[j]) != c1_n.end() ) 
+      if( find(c1_n.begin(), c1_n.end(), target_out) != c1_n.end() ) 
         f1 = true;
-      if( find(c2_n.begin(), c2_n.end(), union_out_names[j]) != c2_n.end() )
+      if( find(c2_n.begin(), c2_n.end(), target_out) != c2_n.end() )
         f2 = true;
 
       if( f1 && f2 ) {
@@ -313,8 +297,9 @@ Channel Channel::hidden_choice (const Channel& c1, const double prob,
   Channel c3(c_m);
   c3.set_in_names(c1_n);
   c3.set_out_names(union_out_names);
-  for(int i=0; i<(int)union_out_names.size(); i++)
-    c3.insert_out_index(union_out_names[i], i);
+  int pos = 0;
+  for(auto it : union_out_names)
+    c3.insert_out_index(it, pos++);
   return c3; 
 }
 
@@ -359,9 +344,12 @@ Channel Channel::visible_choice (const Channel& c1, const double prob,
                                         const Channel& c2) {
 
   std::vector<std::vector<double> > c_m(c1.n_in());
-  std::vector<std::string> new_output(c1.out_names());
-  new_output.insert(new_output.end(), c2.out_names().begin(), 
-                    c2.out_names().end());
+  std::vector<std::string> new_output;
+
+  for(auto it : c1.out_names())
+    new_output.push_back(it);
+  for(auto it : c2.out_names())
+    new_output.push_back(it);
 
   for(int i=0; i<c1.n_in(); i++) {
     c_m[i].assign(new_output.size(), 0);
@@ -510,14 +498,12 @@ void Channel::Randomize() {
 ////////////////
 // Upper and Lower bounds
 std::pair<double, double> 
-  Channel::parallel_vulnerability(const Channel& c1, 
-                         const Channel& c2,
-                         std::vector<std::vector<double>> &g) {
+  Channel::parallel_vulnerability(const Channel& c1, const Channel& c2,
+                                  std::vector<double> prior,
+                                  std::vector<std::vector<double>> &g) {
 
-  std::cout << "Parallel debug" << std::endl;
   double lower, upper;
   double upper_c1 = 0.0, upper_c2 = 0.0;
-
 
   // Upper Bound first term
   for(int y=0; y<c2.n_out(); y++) {
@@ -532,8 +518,7 @@ std::pair<double, double>
     }
     upper_c1 += max_;
   }
-  std::cout << "Upper c1: " << upper_c1 << std::endl;
-  upper_c1 *= c1.PostGVun(g);
+  upper_c1 *= c1.PostGVun(prior, g);
   
   // Upper Bound second term
   for(int y=0; y<c1.n_out(); y++) {
@@ -548,15 +533,11 @@ std::pair<double, double>
     }
     upper_c2 += max_;
   }
-  std::cout << "Upper c2: " << upper_c2 << std::endl;
-  upper_c2 *= c2.PostGVun(g);
+  upper_c2 *= c2.PostGVun(prior, g);
 
-  std::cout << upper_c1 << " " << upper_c2 << std::endl;
-
-  lower = std::max(c1.PostGVun(g), c2.PostGVun(g));
+  lower = std::max(c1.PostGVun(prior, g), c2.PostGVun(prior, g));
   upper = std::min(upper_c1, upper_c2);
 
-  std::cout << "##############" << std::endl;
   return std::pair<double, double>(lower, upper);
 }
 
@@ -571,11 +552,25 @@ std::pair<double, double>
   return std::pair<double, double>(lower, upper);
 }
 std::pair<double, double>
-  Channel::hidden_conditional (const Channel& c1,
-                               const Channel& c2,
-                               const std::vector<std::string> &A) {
-  double lower, upper;
-
+  Channel::hidden_conditional_vulnerability(const Channel& c1, 
+                                            const Channel& c2,
+                                            const std::vector<std::string> &A,
+                                            const std::vector<double> &prior,
+                                            const std::vector<std::vector<double>> &g) {
+  double lower = 0.0, upper = 0.0;
+  std::set<std::string> not_A;
+  for(auto it : c1.in_names())
+    not_A.insert(it);
+  for(auto it : c2.in_names())
+    not_A.insert(it);
+  for(auto it : A)
+    not_A.erase(it);
+  std::vector<std::vector<double>> A_g(g), not_A_g(g);
+  for(auto it : A) {
+  }
+  for(auto it : not_A) {
+  }
+  
   return std::pair<double, double>(lower, upper);
 }
 // Linear Bounds
@@ -717,4 +712,26 @@ double Channel::PostGVun(std::vector<double> prior_distribution,
 	return sum_;
 }
 
+void Channel::setup_default_names() {
+  int input_size = this->n_in(), output_size = this->n_out();
+  std::vector<std::string> input, output;
+
+  for(int i=0; i<input_size; i++)
+    input.push_back("x" + std::to_string(i));
+  for(int i=0; i<output_size; i++)
+    output.push_back("y" + std::to_string(i));
+
+  this->set_in_names(input);
+  this->set_out_names(output);
+
+  this->setup_in_out_map();
+}
+
+void Channel::setup_in_out_map() {
+  int input_size = this->n_in(), output_size = this->n_out();
+  for(int i=0; i<input_size; i++)
+    this->insert_in_index(this->in_names()[i], i);
+  for(int i=0; i<output_size; i++)
+    this->insert_out_index(this->out_names()[i], i);
+}
 } // namespace channel

@@ -2,8 +2,10 @@
 #define _channel_channel_h
 #include <string>
 #include <vector>
-#include <iostream>
+#include <set>
 #include <map>
+
+#include <iostream>
 
 namespace channel {
 
@@ -90,8 +92,16 @@ class Channel {
         return this->h_matrix_;
     }
 
+    const int in_index(std::string s) const {
+        return this->pos_in_names_.at(s);
+    }
+
     const int out_index(std::string s) const {
         return this->pos_out_names_.at(s);
+    }
+
+    void insert_in_index(std::string s, int i) {
+        this->pos_in_names_[s] = i;
     }
 
     void insert_out_index(std::string s, int i) {
@@ -140,35 +150,34 @@ class Channel {
                                         const Channel& c2);
 
     // Upper n Lower Bounds
-    std::pair<double, double> 
+    static std::pair<double, double> 
       parallel_vulnerability (const Channel& c1, const Channel& c2,
+                              std::vector<double> prior,
                               std::vector<std::vector<double>> &g);
 
     // Linear Bounds
-    double 
+    static double 
       visible_choice_vulnerability (const Channel& c1,
                                     const Channel& c2,
                                     const double prob,
                                     std::vector<std::vector<double>> &g);
 
-    std::pair<double, double> 
+    static std::pair<double, double> 
       hidden_choice_vulnerability (const Channel& c1,
                                    const Channel& c2,
                                    const double prob,
                                    std::vector<std::vector<double>> &g);
 
-    double 
-      visible_conditional (const Channel& c1,
-                           const Channel& c2,
-                           const std::vector<std::string> &A);
-    std::pair<double, double>
-      hidden_conditional  (const Channel& c1,
-                           const Channel& c2,
-                           const std::vector<std::string> &A);
-    // This function randomizes the current channel.
-    // Maintaining the channel dimensions.
-    void Randomize();
-
+    static double 
+      visible_conditional_vulnerability (const Channel& c1,
+                                         const Channel& c2,
+                                         const std::vector<std::string> &A);
+    static std::pair<double, double>
+      hidden_conditional_vulnerability (const Channel& c1,
+                                        const Channel& c2,
+                                        const std::vector<std::string> &A,
+                                        const std::vector<double> &prior,
+                                        const std::vector<std::vector<double>> &g);
 
     double ShannonEntropyPrior() const;
     double ShannonEntropyOut() const;
@@ -186,6 +195,8 @@ class Channel {
 		double PostGVun(std::vector<double> prior_distribution, 
                     std::vector<std::vector<double> > g) const;
 
+    // Maps input/output names to their index
+    std::map<std::string, int> pos_in_names_, pos_out_names_;
   private:
     // Channel Name
     std::string cname_ = "";
@@ -222,13 +233,17 @@ class Channel {
     // each output line
     std::vector<std::string> in_names_, out_names_;
 
-    // Maps input/output names to their index
-    std::map<std::string, int> pos_in_names_, pos_out_names_;
+    // This function randomizes the current channel.
+    // Maintaining the channel dimensions.
+    void Randomize();
 
     void build_channel(std::vector<std::vector<double> > c_matrix);
 
     void build_channel(std::vector<std::vector<double> > c_matrix,
                         std::vector<double> prior_distribution);
+
+    void setup_default_names();
+    void setup_in_out_map();
 };
 
 } // namespace channel
