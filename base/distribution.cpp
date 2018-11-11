@@ -94,6 +94,7 @@ namespace base {
     double entropy = 0; 
     std::vector<double> sorted_prior = this->pdist();
     std::sort(sorted_prior.begin(), sorted_prior.end());
+    std::reverse(sorted_prior.begin(), sorted_prior.end());
     int i = 1;
     for(double value : sorted_prior) {
       if(value > 0)
