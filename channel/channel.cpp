@@ -36,6 +36,7 @@ Channel::Channel(const std::vector<std::vector<double> > & c_matrix,
   this->n_out_ = c_matrix[0].size();
   this->base_norm_ = base_norm;
   this->build_channel(c_matrix);
+  this->setup_default_names();
 }
 
 Channel::Channel(const std::vector<std::vector<double> > & c_matrix,
@@ -45,6 +46,7 @@ Channel::Channel(const std::vector<std::vector<double> > & c_matrix,
   this->n_out_ = c_matrix[0].size();
   this->base_norm_ = base_norm;
   this->build_channel(c_matrix, prior_distribution);
+  this->setup_default_names();
 }
 
 
@@ -219,7 +221,6 @@ Channel operator||(const Channel & c1, const Channel & c2) {
   return c3;
 }
 
-
 // Cascade
 Channel operator*(const Channel& c1, const Channel& c2) {
   std::vector<std::vector<double> > new_c(c1.n_in());
@@ -242,7 +243,6 @@ Channel operator*(const Channel& c1, const Channel& c2) {
   return c3;
 }
 
-
 Channel Channel::hidden_choice (const Channel& c1, const double prob,
                                        const Channel& c2) {
   std::vector<std::vector<double> > c_m(c1.n_in());
@@ -261,8 +261,8 @@ Channel Channel::hidden_choice (const Channel& c1, const double prob,
 
   // Removing duplicates
   sort(union_out_names.begin(), union_out_names.end());
-  union_out_names.erase( unique(union_out_names.begin(), union_out_names.end()), 
-                         union_out_names.end());
+  union_out_names.erase(unique(union_out_names.begin(), union_out_names.end()), 
+                        union_out_names.end());
 
   int union_size = union_out_names.size();
   for(int i=0; i<c1.n_in(); i++) {
@@ -369,9 +369,9 @@ Channel Channel::visible_choice (const Channel& c1, const double prob,
 
 // This function computes the result channel from using the
 // visible conditional operator (Old visible if then else)
-Channel Channel::visible_conditional (const Channel& c1, 
-                                    std::vector<std::string> &A, 
-                                    const Channel& c2) {
+Channel Channel::visible_conditional(const Channel& c1, 
+                                     std::vector<std::string> &A, 
+                                     const Channel& c2) {
 
   std::vector<std::vector<double> > c_m(c1.n_in());
 
@@ -567,10 +567,17 @@ std::pair<double, double>
     not_A.erase(it);
   std::vector<std::vector<double>> A_g(g), not_A_g(g);
   for(auto it : A) {
+    int pos = c1.in_index(it);
+    for(int i=0; i<A_g[pos].size(); i++)
+      A_g[pos][i] = 0.0;
   }
   for(auto it : not_A) {
+    int pos = c2.in_index(it);
+    for(int i=0; i<not_A_g[pos].size(); i++)
+      not_A_g[pos][i] = 0.0;
   }
-  
+  lower = std::max(c1.PostGVun(A_g), c2.PostGVun(not_A_g)); 
+  upper = c1.PostGVun(A_g) + c2.PostGVun(not_A_g);
   return std::pair<double, double>(lower, upper);
 }
 // Linear Bounds
