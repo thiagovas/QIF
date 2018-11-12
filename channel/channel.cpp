@@ -196,17 +196,17 @@ Channel operator||(const Channel & c1, const Channel & c2) {
     c_m[i].assign(c3_cols, 0.0);
   }
 
-  std::vector<std::vector<double> > c1_c = c1.c_matrix();
-  std::vector<std::vector<double> > c2_c = c2.c_matrix();
+  //std::vector<std::vector<double> > c1_c = c1.c_matrix();
+  //std::vector<std::vector<double> > c2_c = c2.c_matrix();
 
   int col_pos = 0;
   for(int i=0; i<c1.n_out(); i++) {
     for(int j=0; j<c2.n_out(); j++) {
 
-      std::string c1_ = c1.out_names()[i];
-      std::string c2_ = c2.out_names()[j];
+      //std::string c1_ = c1.out_names()[i];
+      //std::string c2_ = c2.out_names()[j];
 
-      out_names.push_back(c1_ + '.' + c2_);
+      //out_names.push_back(c1_ + '.' + c2_);
       //std::cout << out_names[out_names.size()-1] << std::endl;
       for(int k=0; k<c1.n_in(); k++) {
         //std::cout << i << " " << j << " " << k << std::endl;
@@ -217,7 +217,7 @@ Channel operator||(const Channel & c1, const Channel & c2) {
   }
   Channel c3(c_m);
   c3.set_in_names(c1.in_names());
-  c3.set_out_names(out_names);
+  //c3.set_out_names(out_names);
   return c3;
 }
 
