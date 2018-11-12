@@ -725,8 +725,15 @@ void Channel::setup_default_names() {
 
   for(int i=0; i<input_size; i++)
     input.push_back("x" + std::to_string(i));
-  for(int i=0; i<output_size; i++)
-    output.push_back("y" + std::to_string(i));
+
+  for(int i=0; i<output_size; i++) {
+    std::string num = std::to_string(i);
+
+    while(num.size() < std::to_string(output_size).size())
+      num = "0" + num;
+
+    output.push_back("y" + num);
+  }
 
   this->set_in_names(input);
   this->set_out_names(output);
@@ -738,7 +745,7 @@ void Channel::setup_in_out_map() {
   int input_size = this->n_in(), output_size = this->n_out();
   for(int i=0; i<input_size; i++)
     this->insert_in_index(this->in_names()[i], i);
-  for(int i=0; i<output_size; i++)
+  for(int i=0; i<output_size; i++) 
     this->insert_out_index(this->out_names()[i], i);
 }
 } // namespace channel
