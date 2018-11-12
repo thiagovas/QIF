@@ -196,8 +196,8 @@ Channel operator||(const Channel & c1, const Channel & c2) {
     c_m[i].assign(c3_cols, 0.0);
   }
 
-  //std::vector<std::vector<double> > c1_c = c1.c_matrix();
-  //std::vector<std::vector<double> > c2_c = c2.c_matrix();
+  std::vector<std::vector<double> > c1_c = c1.c_matrix();
+  std::vector<std::vector<double> > c2_c = c2.c_matrix();
 
   int col_pos = 0;
   for(int i=0; i<c1.n_out(); i++) {
