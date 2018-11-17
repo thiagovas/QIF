@@ -411,13 +411,11 @@ Channel Channel::hidden_conditional (const Channel& c1,
   std::vector<std::string> c1_out = c1.out_names();
   std::vector<std::string> c2_out = c2.out_names();
 
-  std::vector<std::string> union_out_names(c1_out);
-  union_out_names.insert(union_out_names.end(), c2_out.begin(), c2_out.end());
-
-  // Removing duplicates
-  sort(union_out_names.begin(), union_out_names.end());
-  union_out_names.erase( unique(union_out_names.begin(), union_out_names.end()), 
-                         union_out_names.end());
+  std::set<std::string> union_out_names;
+  for(auto it : c1_out)
+    union_out_names.insert(it);
+  for(auto it : c2_out)
+    union_out_names.insert(it);
 
   std::vector<std::string> input_names = c1.in_names();
   int new_output_size = union_out_names.size();
@@ -430,32 +428,32 @@ Channel Channel::hidden_conditional (const Channel& c1,
       int c3_output_pos = 0;
       int c1_output_pos = 0;
       while(c1_output_pos < c1.n_out()) {
-        if(c1_out[c1_output_pos] == union_out_names[c3_output_pos]) {
-          c_m[i][c3_output_pos] = c1_m[i][c1_output_pos];
-          c1_output_pos++;
-        }
-        c3_output_pos++;
+        auto pos = union_out_names.find(c1_out[c1_output_pos]);    
+        int dist = (int)std::distance(union_out_names.begin(), pos);
+        c_m[i][dist] = c1_m[i][c1_output_pos];
+        c1_output_pos++;
       }
     }
     // C2
     else {
       int c3_output_pos = 0;
       int c2_output_pos = 0;
-      while(c2_output_pos < c2.n_out()) {
-        if(c2_out[c2_output_pos] == union_out_names[c3_output_pos]) {
-          c_m[i][c3_output_pos] = c2_m[i][c2_output_pos];
-          c2_output_pos++;
-        }
-        c3_output_pos++;
+      while(c2_output_pos < c1.n_out()) {
+        auto pos = union_out_names.find(c2_out[c2_output_pos]);    
+        int dist = (int)std::distance(union_out_names.begin(), pos);
+        c_m[i][dist] = c2_m[i][c2_output_pos];
+        c2_output_pos++;
       }
     }
   }
 
   Channel c3(c_m);
   c3.set_in_names(input_names);
-  c3.set_out_names(union_out_names);
-  for(int i=0; i<(int)union_out_names.size(); i++)
-    c3.insert_out_index(union_out_names[i], i);
+  std::vector<std::string> out_names;
+  std::copy(union_out_names.begin(), union_out_names.end(), std::back_inserter(out_names));
+  c3.set_out_names(out_names);
+  for(int i=0; i<(int)out_names.size(); i++)
+    c3.insert_out_index(out_names[i], i);
   return c3; 
 }
 
@@ -684,7 +682,7 @@ double Channel::PriorGVun(std::vector<std::vector<double> > g) const {
 	return max_;
 }
 
-double Channel::PostGVun(std::vector<std::vector<double> > g) const {
+double Channel::PostGVun(const std::vector<std::vector<double> > &g) const {
 	double sum_ = 0;
 	for(int y_i = 0; y_i<this->n_out(); y_i++) {
 		double max_w = 0;
@@ -701,8 +699,8 @@ double Channel::PostGVun(std::vector<std::vector<double> > g) const {
 	return sum_;
 }
 
-double Channel::PostGVun(std::vector<double> prior_distribution,
-                         std::vector<std::vector<double> > g) const {
+double Channel::PostGVun(const std::vector<double> &prior_distribution,
+                         const std::vector<std::vector<double> > &g) const {
 	double sum_ = 0;
 	for(int y_i = 0; y_i<this->n_out(); y_i++) {
 		double max_w = 0;
