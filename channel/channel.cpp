@@ -684,7 +684,7 @@ double Channel::PriorGVun(std::vector<std::vector<double> > g) const {
 	return max_;
 }
 
-double Channel::PostGVun(std::vector<std::vector<double> > g) const {
+double Channel::PostGVun(const std::vector<std::vector<double> > &g) const {
 	double sum_ = 0;
 	for(int y_i = 0; y_i<this->n_out(); y_i++) {
 		double max_w = 0;
@@ -701,8 +701,8 @@ double Channel::PostGVun(std::vector<std::vector<double> > g) const {
 	return sum_;
 }
 
-double Channel::PostGVun(std::vector<double> prior_distribution,
-                         std::vector<std::vector<double> > g) const {
+double Channel::PostGVun(const std::vector<double> &prior_distribution,
+                         const std::vector<std::vector<double> > &g) const {
 	double sum_ = 0;
 	for(int y_i = 0; y_i<this->n_out(); y_i++) {
 		double max_w = 0;
