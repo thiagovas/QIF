@@ -191,9 +191,9 @@ class Channel {
     //double PriorGVun() const; // G_ID
 		double PriorGVun(std::vector<std::vector<double> > g) const;
     //double PostGVun() const; // G_ID
-		double PostGVun(const std::vector<std::vector<double> > &g) const;
-		double PostGVun(const std::vector<double> &prior_distribution, 
-                    const std::vector<std::vector<double> > &g) const;
+		double PostGVun(std::vector<std::vector<double> > g) const;
+		double PostGVun(std::vector<double> prior_distribution, 
+                    std::vector<std::vector<double> > g) const;
 
     // Maps input/output names to their index
     std::map<std::string, int> pos_in_names_, pos_out_names_;
