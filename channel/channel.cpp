@@ -576,8 +576,8 @@ std::pair<double, double>
     for(int i=0; i<not_A_g[pos].size(); i++)
       not_A_g[pos][i] = 0.0;
   }
-  lower = std::max(c1.PostGVun(A_g), c2.PostGVun(not_A_g)); 
-  upper = c1.PostGVun(A_g) + c2.PostGVun(not_A_g);
+  lower = std::max(c1.PostGVun(prior, A_g), c2.PostGVun(prior, not_A_g)); 
+  upper = c1.PostGVun(prior, A_g) + c2.PostGVun(prior, not_A_g);
   return std::pair<double, double>(lower, upper);
 }
 // Linear Bounds
