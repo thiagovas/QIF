@@ -748,4 +748,4 @@ void Channel::setup_in_out_map() {
   for(int i=0; i<output_size; i++) 
     this->insert_out_index(this->out_names()[i], i);
 }
-} // namespace channel
+}  // namespace channel
