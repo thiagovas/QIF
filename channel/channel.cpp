@@ -421,7 +421,7 @@ Channel Channel::hidden_conditional (const Channel& c1,
 
   std::vector<std::string> input_names = c1.in_names();
   int new_output_size = union_out_names.size();
-  for(int i=0; i<input_names.size(); i++) {
+  for(unsigned i=0; i<input_names.size(); i++) {
     std::string x_name = input_names[i];
     c_m[i].assign(new_output_size, 0);
     auto it = std::find(A.begin(), A.end(), x_name);
