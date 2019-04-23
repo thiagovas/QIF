@@ -3,8 +3,8 @@ cc_test(
     srcs = ["channel.cpp"],
     copts = ["-Iexternal/googletest/googletest/include"],
     deps = [
-      "@gtest//:gtest",
-      "@gtest//:gtest_main",
+      "@googletest//:gtest",
+      "@googletest//:gtest_main",
       "//channel:channel",
     ],
 )
@@ -14,8 +14,8 @@ cc_test(
     srcs = ["channelmeasures.cpp"],
     copts = ["-Iexternal/googletest/googletest/include"],
     deps = [
-      "@gtest//:gtest",
-      "@gtest//:gtest_main",
+      "@googletest//:gtest",
+      "@googletest//:gtest_main",
       "//channel:channel",
     ],
 )
@@ -25,8 +25,8 @@ cc_test(
     srcs = ["distribution.cpp"],
     copts = ["-Iexternal/googletest/googletest/include"],
     deps = [
-      "@gtest//:gtest",
-      "@gtest//:gtest_main",
+      "@googletest//:gtest",
+      "@googletest//:gtest_main",
       "//base:distribution",
     ],
 )

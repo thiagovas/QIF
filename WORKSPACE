@@ -1,8 +1,7 @@
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-http_archive(
-    name="googletest",
-    url="https://github.com/google/googletest/archive/release-1.8.1.zip",
-    build_file="gmock.BUILD",
-    strip_prefix = "googletest-release-1.8.1",
+git_repository(
+    name = "googletest",
+    remote = "https://github.com/google/googletest.git",
+    tag = "release-1.8.1",
 )
