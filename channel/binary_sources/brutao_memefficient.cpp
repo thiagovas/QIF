@@ -14,6 +14,7 @@
 
 #include "../channel.h"
 #include "../vulnerability/bayes.h"
+#include "../vulnerability/vulnerability.h"
 
 using namespace std;
 using namespace channel;
@@ -159,20 +160,19 @@ void print_matrix(const vector<vector<int> >& matrix) {
 
 int main() {
   Bayes b;
-  int i = 3, j = 3;
   for(int i = 2; i <= MAX_INPUT; i++) {
     for(int j = 2; j <= MAX_OUTPUT; j++) {
-      cout << "Brute-forcing " << i << " X " << j << " ...\n";
+      cout << "Brute-forcing " << i << " X " << j << " ...\n" << std::flush;
       BASE_NORM = 3;
       best_diff1 = -1, best_diff2 = -1;
       best_matrix_c1 = vector<vector<int> > (i, vector<int>(j, 0));
       best_matrix_c2 = vector<vector<int> > (i, vector<int>(j, 0));
-      while(++BASE_NORM <= 100) {
+      while(++BASE_NORM <= 500) {
         vector<vector<int> > c1(i, vector<int>(j, 0));
         vector<vector<int> > c2(i, vector<int>(j, 0));
         prior_distribution = vector<double>(i, 1.0f/i);
         
-        cout << "\r" << BASE_NORM << std::flush;
+        //cout << "\r" << BASE_NORM << std::flush;
         c1[0][j-1] = BASE_NORM;
         c2[0][j-1] = BASE_NORM;
         brute(c1, c2, 0);
